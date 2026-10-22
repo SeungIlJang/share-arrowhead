@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 760" width="1120" height="760" font-family="system-ui, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#2b6cb0"/>
+    </marker>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6b4a2a"/><stop offset="0.5" stop-color="#9c6c3c"/><stop offset="1" stop-color="#5a3e22"/>
+    </linearGradient>
+    <style>
+      .dim{stroke:#2b6cb0;stroke-width:1.2;marker-start:url(#a);marker-end:url(#a)}
+      .ext{stroke:#2b6cb0;stroke-width:0.7;stroke-dasharray:4 3}
+      .dt{fill:#2b6cb0;font-size:14px;font-weight:700;text-anchor:middle}
+      .ds{fill:#5a7fa6;font-size:12px;text-anchor:middle}
+      .lead{stroke:#8a6b3c;stroke-width:1;fill:none}
+      .cal{fill:#5a3e22;font-size:13px;font-weight:700}
+      .ttl{fill:#241607;font-size:22px;font-weight:800}
+      .sub{fill:#7a6a55;font-size:13px}
+      .ph{fill:#241607;font-size:14px;font-weight:800}
+      .pb{fill:#3a3028;font-size:13px}
+      .mono{font-family:ui-monospace,Consolas,monospace;font-size:13px;fill:#1d4e89}
+      .warn{fill:#8a2b22;font-size:13px;font-weight:700}
+    </style>
+  </defs>
+
+  <rect width="1120" height="760" fill="#fdfaf4"/>
+
+  <text class="ttl" x="36" y="40">모두의 화살촉 — 항아리 치수 도면</text>
+  <text class="sub" x="36" y="62">입구 폭(mouth)을 1.000 으로 둔 상대 치수. 귀 관련 3개 값은 게임 적중 판정에 직접 쓰이므로 반드시 준수.</text>
+
+  <!-- ============ 도면 ============ -->
+  <!-- 접지 그림자 -->
+  <ellipse cx="330" cy="546" rx="182" ry="13" fill="#000" opacity="0.18"/>
+
+  <!-- 귀 (몸통보다 뒤에 그려짐) -->
+  <g>
+    <rect x="114" y="210" width="72" height="115" rx="25" fill="url(#body)"/>
+    <rect x="474" y="210" width="72" height="115" rx="25" fill="url(#body)"/>
+  </g>
+
+  <!-- 몸통 -->
+  <path d="M 210,210 C 112.6,282.8 112.6,448.2 199.6,540.9 L 460.4,540.9 C 547.4,448.2 547.4,282.8 450,210 Z" fill="url(#body)"/>
+
+  <!-- 띠 장식 -->
+  <line x1="147" y1="375" x2="513" y2="375" stroke="#000" stroke-opacity="0.2" stroke-width="7"/>
+
+  <!-- 귀 구멍 -->
+  <ellipse cx="150" cy="210" rx="36" ry="17" fill="#241607"/>
+  <ellipse cx="150" cy="210" rx="36" ry="17" fill="none" stroke="#3a2410" stroke-width="2.5"/>
+  <ellipse cx="510" cy="210" rx="36" ry="17" fill="#241607"/>
+  <ellipse cx="510" cy="210" rx="36" ry="17" fill="none" stroke="#3a2410" stroke-width="2.5"/>
+
+  <!-- 입구 -->
+  <ellipse cx="330" cy="210" rx="120" ry="43" fill="#241607"/>
+  <ellipse cx="330" cy="210" rx="120" ry="43" fill="none" stroke="#3a2410" stroke-width="3.5"/>
+  <!-- 림 좌우 끝 하이라이트 -->
+  <rect x="207" y="200" width="6" height="20" fill="#ffdc78"/>
+  <rect x="447" y="200" width="6" height="20" fill="#ffdc78"/>
+
+  <!-- 중심선 -->
+  <line x1="330" y1="150" x2="330" y2="580" class="ext"/>
+  <!-- 림 기준선 -->
+  <line x1="60" y1="210" x2="600" y2="210" class="ext"/>
+  <text class="ds" x="625" y="207" text-anchor="start">림 기준선 (rimY)</text>
+
+  <!-- ===== 치수: 위쪽 ===== -->
+  <line x1="114" y1="210" x2="114" y2="62" class="ext"/>
+  <line x1="546" y1="210" x2="546" y2="62" class="ext"/>
+  <line x1="114" y1="74" x2="546" y2="74" class="dim"/>
+  <text class="dt" x="330" y="68">귀 외곽 간격 = 입구 × 1.80</text>
+
+  <line x1="150" y1="193" x2="150" y2="106" class="ext"/>
+  <line x1="510" y1="193" x2="510" y2="106" class="ext"/>
+  <line x1="150" y1="118" x2="510" y2="118" class="dim"/>
+  <text class="dt" x="330" y="112">귀 중심 간격 = 입구 × 1.50  (중심에서 ±0.75)</text>
+
+  <line x1="210" y1="167" x2="210" y2="150" class="ext"/>
+  <line x1="450" y1="167" x2="450" y2="150" class="ext"/>
+  <line x1="210" y1="162" x2="450" y2="162" class="dim"/>
+  <text class="dt" x="330" y="156">입구 폭 (mouth) = 1.000  ★기준</text>
+
+  <!-- 귀 구멍 폭 -->
+  <line x1="114" y1="340" x2="114" y2="368" class="ext"/>
+  <line x1="186" y1="340" x2="186" y2="368" class="ext"/>
+  <line x1="114" y1="362" x2="186" y2="362" class="dim"/>
+  <text class="dt" x="150" y="382">귀 구멍 폭</text>
+  <text class="ds" x="150" y="398">= 입구 × 0.30</text>
+
+  <!-- 귀 높이 -->
+  <line x1="546" y1="210" x2="588" y2="210" class="ext"/>
+  <line x1="546" y1="325" x2="588" y2="325" class="ext"/>
+  <line x1="578" y1="210" x2="578" y2="325" class="dim"/>
+  <text class="dt" x="578" y="350" transform="rotate(0 578 350)">귀 높이</text>
+  <text class="ds" x="578" y="366">= 귀폭 × 1.6</text>
+
+  <!-- ===== 치수: 아래쪽 ===== -->
+  <line x1="112.6" y1="470" x2="112.6" y2="618" class="ext"/>
+  <line x1="547.4" y1="470" x2="547.4" y2="618" class="ext"/>
+  <line x1="112.6" y1="606" x2="547.4" y2="606" class="dim"/>
+  <text class="dt" x="330" y="628">몸통 최대 폭 (w) — 단계별 가변</text>
+
+  <line x1="199.6" y1="541" x2="199.6" y2="662" class="ext"/>
+  <line x1="460.4" y1="541" x2="460.4" y2="662" class="ext"/>
+  <line x1="199.6" y1="650" x2="460.4" y2="650" class="dim"/>
+  <text class="dt" x="330" y="672">굽 폭 = 몸통 폭 × 0.60</text>
+
+  <!-- ===== 치수: 왼쪽 세로 ===== -->
+  <line x1="112.6" y1="210" x2="62" y2="210" class="ext"/>
+  <line x1="199.6" y1="540.9" x2="62" y2="540.9" class="ext"/>
+  <line x1="74" y1="210" x2="74" y2="540.9" class="dim"/>
+  <text class="dt" x="46" y="360" transform="rotate(-90 46 360)">높이 (h) — 단계별 가변</text>
+
+  <!-- 띠 위치 리더 -->
+  <path class="lead" d="M 513,375 L 600,375"/>
+  <circle cx="513" cy="375" r="3" fill="#8a6b3c"/>
+  <text class="cal" x="606" y="372">띠 장식</text>
+  <text class="ds" x="606" y="389" text-anchor="start">y = 높이 × 0.50 · 폭 = 몸통폭 × 0.84</text>
+
+  <!-- 구멍 콜아웃 -->
+  <path class="lead" d="M 330,228 L 330,262 L 392,262"/>
+  <text class="cal" x="398" y="266">관(貫) 정중앙 ×2.5</text>
+  <path class="lead" d="M 150,224 L 150,470 L 96,470"/>
+  <text class="cal" x="92" y="474" text-anchor="end">귀(耳) ×2</text>
+  <text class="ds" x="92" y="490" text-anchor="end">좁지만 고득점</text>
+
+  <text class="ds" x="330" y="706">세 구멍 모두 "속이 빈 검은 공동"으로 읽혀야 합니다 — 평평한 원반이 되면 화살이 들어가는 곳임이 전달되지 않습니다.</text>
+  <text class="ds" x="330" y="726">정면 정투상(원근 없음) · 아웃라인 없음 · 광원 우측 상단 1개</text>
+
+  <!-- ============ 우측 패널 ============ -->
+  <rect x="700" y="90" width="384" height="290" rx="12" fill="#fff" stroke="#d8cdb8"/>
+  <text class="ph" x="720" y="118">고정 비율 — 전 단계 동일 (코드 상수)</text>
+  <text class="mono" x="720" y="144">귀 구멍 폭   = 입구 × 0.30</text>
+  <text class="mono" x="720" y="166">귀 중심 오프셋 = 입구 × 0.75</text>
+  <text class="mono" x="720" y="188">귀 외곽      = 입구 × 0.90</text>
+  <text class="mono" x="720" y="210">입구 타원 세로반경 = 입구 × 0.18</text>
+  <text class="mono" x="720" y="232">귀 타원 세로반경  = 귀폭 × 0.24</text>
+  <text class="mono" x="720" y="254">귀 높이      = 귀폭 × 1.60</text>
+  <text class="mono" x="720" y="276">굽 폭       = 몸통폭 × 0.60</text>
+  <text class="mono" x="720" y="298">띠 y        = 높이 × 0.50</text>
+  <text class="pb" x="720" y="330">→ 림(입구)+귀 어셈블리는 비율이 고정이므로</text>
+  <text class="pb" x="720" y="348">　 <tspan font-weight="800">전 단계 공용 1장</tspan>으로 납품하면 됩니다.</text>
+  <text class="pb" x="720" y="366">　 (균등 확대/축소만 적용)</text>
+
+  <rect x="700" y="396" width="384" height="250" rx="12" fill="#fff" stroke="#d8cdb8"/>
+  <text class="ph" x="720" y="424">단계별 가변 — 몸통만 변합니다</text>
+  <text class="pb" x="720" y="448" font-weight="800">단계　입구/몸통폭　높이/몸통폭　실제 px</text>
+  <text class="mono" x="720" y="470">  1 　　0.55 　　　 0.76 　　102×78</text>
+  <text class="mono" x="720" y="490">  6 　　0.52 　　　 0.93 　　 92×86</text>
+  <text class="mono" x="720" y="510"> 10 　　0.49 　　　 1.10 　　 84×92</text>
+  <text class="mono" x="720" y="530"> 14 　　0.45 　　　 1.30 　　 76×98</text>
+  <text class="mono" x="720" y="550"> 20 　　0.52 　　　 1.64 　　 66×108</text>
+  <text class="mono" x="720" y="570"> 30 　　0.52 　　　 1.85 　　 66×122</text>
+  <text class="warn" x="720" y="600">⚠ 높이/폭이 0.76 → 1.85 (2.4배) 변합니다.</text>
+  <text class="pb" x="720" y="620">단일 비트맵 세로 늘이기로는 띠·굽이 깨집니다.</text>
+  <text class="pb" x="720" y="638">→ <tspan font-weight="800">벡터 마스터 필수</tspan> (또는 LOD 4종: 0.85/1.10/1.45/1.75)</text>
+
+  <rect x="700" y="662" width="384" height="66" rx="12" fill="#fff4f2" stroke="#e5b7ae"/>
+  <text class="warn" x="720" y="688">⚠ 비율이 어긋나면 게임이 망가집니다</text>
+  <text class="pb" x="720" y="708">보이는 구멍과 실제 적중 판정 좌표가 분리되어,</text>
+  <text class="pb" x="720" y="722">"들어갔는데 빗나감"이 발생합니다.</text>
+</svg>

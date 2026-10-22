@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 980" width="1120" height="980" font-family="system-ui, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#2b6cb0"/>
+    </marker>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#24405e"/><stop offset="0.55" stop-color="#4a6a7e"/><stop offset="1" stop-color="#caa36e"/>
+    </linearGradient>
+    <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a5832"/><stop offset="1" stop-color="#43301c"/>
+    </linearGradient>
+    <style>
+      .dim{stroke:#2b6cb0;stroke-width:1.2;marker-start:url(#b);marker-end:url(#b)}
+      .ext{stroke:#2b6cb0;stroke-width:0.7;stroke-dasharray:4 3}
+      .dt{fill:#2b6cb0;font-size:12px;font-weight:700}
+      .ttl{fill:#241607;font-size:22px;font-weight:800}
+      .sub{fill:#7a6a55;font-size:13px}
+      .ph{fill:#241607;font-size:14px;font-weight:800}
+      .pb{fill:#3a3028;font-size:12.5px}
+      .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px;fill:#1d4e89}
+      .uiblk{fill:#e8534e;fill-opacity:0.16;stroke:#e8534e;stroke-opacity:0.55;stroke-dasharray:5 4}
+      .uilab{fill:#a3302a;font-size:11.5px;font-weight:700}
+      .glab{fill:#fff;font-size:11px;font-weight:700}
+      .warn{fill:#8a2b22;font-size:12.5px;font-weight:700}
+    </style>
+  </defs>
+  <rect width="1120" height="980" fill="#fdfaf4"/>
+
+  <text class="ttl" x="36" y="40">모두의 화살촉 — 화면 구성 / 세이프에어리어</text>
+  <text class="sub" x="36" y="62">기준 375 × 812 (1:1 축척) · 노치 상단 47px / 하단 34px 가정 · 대응 범위 320×568 ~ 430×932</text>
+
+  <!-- ===== 화면 ===== -->
+  <rect x="70" y="70" width="375" height="633" fill="url(#sky)"/>
+  <rect x="70" y="703" width="375" height="179" fill="url(#gnd)"/>
+  <rect x="70" y="70" width="375" height="812" fill="none" stroke="#241607" stroke-width="2"/>
+
+  <!-- 해 -->
+  <circle cx="362" cy="247" r="26" fill="#ffe9b8" opacity="0.95"/>
+  <circle cx="362" cy="247" r="60" fill="#ffe9b8" opacity="0.14"/>
+  <text class="glab" x="362" y="320" text-anchor="middle" fill="#2b2b2b">해 78% / 28%</text>
+
+  <!-- 지평선 -->
+  <line x1="70" y1="703" x2="445" y2="703" stroke="#ffe6b4" stroke-opacity="0.6" stroke-width="2"/>
+
+  <!-- 항아리 위치 범위 -->
+  <rect x="270" y="582" width="100" height="121" fill="#9c6c3c" fill-opacity="0.35" stroke="#ffe14d" stroke-dasharray="4 3"/>
+  <ellipse cx="270" cy="582" rx="28" ry="6" fill="#241607" opacity="0.8"/>
+  <ellipse cx="370" cy="582" rx="20" ry="4" fill="#241607" opacity="0.8"/>
+  <line x1="270" y1="730" x2="370" y2="730" class="dim"/>
+  <text class="dt" x="320" y="748" text-anchor="middle" fill="#ffe6b0">항아리 x: 53% → 80%</text>
+
+  <!-- 사대 -->
+  <rect x="105" y="697" width="28" height="7" rx="3" fill="#8a6b3c"/>
+  <line x1="118.8" y1="704" x2="118.8" y2="756" class="ext" stroke="#ffe6b0"/>
+  <text class="dt" x="118.8" y="772" text-anchor="middle" fill="#ffe6b0">사대 x = 13%</text>
+
+  <!-- 상단 UI 영역 -->
+  <rect class="uiblk" x="70" y="117" width="375" height="133"/>
+  <rect x="70" y="70" width="375" height="47" fill="#241607" fill-opacity="0.35"/>
+  <text class="uilab" x="78" y="100">safe-area-inset-top (노치 47px 가정)</text>
+
+  <rect x="118" y="125" width="60" height="44" rx="10" fill="#140e08" fill-opacity="0.75" stroke="#6a4e2a"/>
+  <rect x="182" y="125" width="60" height="44" rx="10" fill="#140e08" fill-opacity="0.75" stroke="#6a4e2a"/>
+  <rect x="246" y="125" width="60" height="44" rx="10" fill="#140e08" fill-opacity="0.75" stroke="#6a4e2a"/>
+  <rect x="310" y="125" width="60" height="44" rx="10" fill="#140e08" fill-opacity="0.75" stroke="#6a4e2a"/>
+  <text class="glab" x="148" y="152" text-anchor="middle">점수</text>
+  <text class="glab" x="212" y="152" text-anchor="middle">연속</text>
+  <text class="glab" x="276" y="152" text-anchor="middle">단계</text>
+  <text class="glab" x="340" y="152" text-anchor="middle">최고</text>
+
+  <text class="glab" x="257" y="190" text-anchor="middle">🏹🏹🏹🏹🏹  화살통</text>
+  <text class="glab" x="257" y="206" text-anchor="middle">목표 1 / 2 넣기</text>
+  <text class="glab" x="257" y="229" text-anchor="middle" fill="#9fd0ff">💨 바람 → ▮▮▮</text>
+  <text class="glab" x="257" y="247" text-anchor="middle" fill="#ffbe6b">🌙 밤 + 🌫 안개 (점수 ×2.4)</text>
+
+  <rect x="399" y="167" width="38" height="38" rx="9" fill="#140e08" fill-opacity="0.75" stroke="#6a4e2a"/>
+  <rect x="399" y="212" width="38" height="38" rx="9" fill="#140e08" fill-opacity="0.75" stroke="#6a4e2a"/>
+  <text class="glab" x="418" y="191" text-anchor="middle">🔊</text>
+  <text class="glab" x="418" y="236" text-anchor="middle">⏸</text>
+
+  <!-- 중앙 메시지 -->
+  <text class="glab" x="257" y="416" text-anchor="middle" font-size="20" fill="#ffe14d">관(貫)! 정중앙 🎯</text>
+  <text class="glab" x="257" y="480" text-anchor="middle">+96점 · 2.5배 × 연속3</text>
+  <line x1="70" y1="411" x2="445" y2="411" class="ext" stroke="#fff" stroke-opacity="0.4"/>
+  <text class="dt" x="452" y="414" fill="#2b6cb0">#msg · 42%</text>
+  <line x1="70" y1="476" x2="445" y2="476" class="ext" stroke="#fff" stroke-opacity="0.4"/>
+  <text class="dt" x="452" y="479" fill="#2b6cb0">#sub · 50%</text>
+
+  <!-- 하단 UI 영역 -->
+  <rect class="uiblk" x="70" y="752" width="375" height="130"/>
+  <text class="glab" x="257" y="762" text-anchor="middle" fill="#ffe14d">② 탭 — 힘 멈추기</text>
+  <rect x="103.75" y="820" width="307.5" height="20" rx="8" fill="#140e08" fill-opacity="0.6" stroke="#6a4e2a"/>
+  <rect x="103.75" y="820" width="150" height="20" rx="8" fill="#e8c24e"/>
+  <rect x="246" y="813" width="3" height="34" fill="#fff"/>
+  <text class="glab" x="257" y="856" text-anchor="middle">파워 게이지 · 목표 눈금</text>
+  <rect x="70" y="848" width="375" height="34" fill="#241607" fill-opacity="0.35"/>
+  <text class="uilab" x="78" y="876">safe-area-inset-bottom (34px)</text>
+
+  <!-- 치수 -->
+  <line x1="56" y1="70" x2="56" y2="703" class="dim"/>
+  <text class="dt" x="34" y="390" transform="rotate(-90 34 390)">하늘 = 높이 78%</text>
+  <line x1="56" y1="703" x2="56" y2="882" class="dim"/>
+  <text class="dt" x="34" y="800" transform="rotate(-90 34 800)">땅 22%</text>
+  <line x1="70" y1="906" x2="445" y2="906" class="dim"/>
+  <text class="dt" x="257" y="926" text-anchor="middle">375 px</text>
+
+  <!-- 림 높이 범위 -->
+  <line x1="370" y1="582" x2="470" y2="582" class="ext"/>
+  <line x1="270" y1="626" x2="470" y2="626" class="ext"/>
+  <line x1="462" y1="582" x2="462" y2="626" class="dim"/>
+  <text class="dt" x="476" y="600">입구 높이(rimY)</text>
+  <text class="dt" x="476" y="616">y 512~556 (63~70%)</text>
+
+  <!-- ===== 우측 패널 ===== -->
+  <rect x="620" y="90" width="464" height="186" rx="12" fill="#fff" stroke="#d8cdb8"/>
+  <text class="ph" x="640" y="118">배경 레이어 — 지평선이 모든 기준</text>
+  <text class="pb" x="640" y="142">bg-sky    : 0 ~ 78% (지평선까지). 해는 가로 78%, 지평선 기준 28%</text>
+  <text class="pb" x="640" y="162">bg-hills  : 지평선 위 0~54px. 밑변 수평, <tspan font-weight="800">가로 심리스</tspan></text>
+  <text class="pb" x="640" y="182">bg-ground : 78% ~ 100%. 상단에 하이라이트 1줄, <tspan font-weight="800">가로 심리스</tspan></text>
+  <text class="pb" x="640" y="206">구름은 바람 방향으로 코드 스크롤 → 세로 타일링 불필요</text>
+  <text class="warn" x="640" y="234">⚠ 상단 133px / 하단 130px 은 UI가 덮습니다 (붉은 영역)</text>
+  <text class="pb" x="640" y="254">배경의 의미 있는 요소(해·산 봉우리·중요 디테일)를</text>
+  <text class="pb" x="640" y="270">　이 영역 안에 두지 마세요.</text>
+
+  <rect x="620" y="292" width="464" height="248" rx="12" fill="#fff" stroke="#d8cdb8"/>
+  <text class="ph" x="640" y="320">실제 렌더 크기 (375×812 기준) — @3x 가 상한</text>
+  <text class="mono" x="640" y="346">항아리　　　　　　66~102 × 78~122 px</text>
+  <text class="mono" x="640" y="366">날아가는 화살　　　 42 × 12 px</text>
+  <text class="mono" x="640" y="386">꽂힌 화살(보이는 부분) 38 × 11 px</text>
+  <text class="mono" x="640" y="406">사대(멍석)　　　　 68 × 14 px</text>
+  <text class="mono" x="640" y="426">바람 깃대　　　　 높이 136~180 px</text>
+  <text class="mono" x="640" y="446">깃발　　　　　　 길이 28~54 px</text>
+  <text class="mono" x="640" y="466">해 / 달　　　　　 반지름 20~26 px</text>
+  <text class="mono" x="640" y="486">파워 게이지　　　 308 × 20 px</text>
+  <text class="mono" x="640" y="506">아이콘 버튼　　　 38 × 38 px</text>
+  <text class="warn" x="640" y="530">→ 디테일보다 실루엣. 1x 로 축소해 형태 확인 필수.</text>
+
+  <rect x="620" y="556" width="464" height="150" rx="12" fill="#fff" stroke="#d8cdb8"/>
+  <text class="ph" x="640" y="584">대응 해상도 / 변형 규칙</text>
+  <text class="pb" x="640" y="608">320×568 · 360×640 · 375×812 · 414×896 · 430×932 · 768×1024</text>
+  <text class="pb" x="640" y="630">모든 좌표가 <tspan font-weight="800">화면 비율</tspan>로 계산됩니다 → 고정 px 레이아웃 없음</text>
+  <text class="pb" x="640" y="652">배경은 <tspan font-weight="800">cover</tspan> 방식으로 늘어납니다. 가로로 잘려도</text>
+  <text class="pb" x="640" y="668">　중요 요소가 살아남게 가운데로 모아 주세요.</text>
+  <text class="pb" x="640" y="690">세로 여유가 적은 기기(320×568)에서 상단 UI가 더 빽빽해집니다.</text>
+
+  <rect x="620" y="722" width="464" height="112" rx="12" fill="#fff8ec" stroke="#e5cfa8"/>
+  <text class="ph" x="640" y="750">네이티브 배너 광고가 켜진 경우</text>
+  <text class="pb" x="640" y="774">하단 <tspan font-weight="800">64px</tspan>이 추가로 가려지고, 파워 게이지가 그만큼 위로 올라갑니다.</text>
+  <text class="pb" x="640" y="794">(코드: <tspan class="mono">bottomRes() = 64</tspan>)</text>
+  <text class="pb" x="640" y="818">하단 배경에 반드시 보여야 하는 요소를 두지 마세요.</text>
+
+  <rect x="620" y="850" width="464" height="84" rx="12" fill="#fff" stroke="#d8cdb8"/>
+  <text class="ph" x="640" y="878">카메라</text>
+  <text class="pb" x="640" y="902">카메라 이동·줌 없음. <tspan font-weight="800">한 장면 고정</tspan>입니다.</text>
+  <text class="pb" x="640" y="922">적중 시 짧은 화면 흔들림(최대 10px)과 플래시만 있습니다.</text>
+</svg>

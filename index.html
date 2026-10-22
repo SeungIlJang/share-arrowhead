@@ -6,19 +6,39 @@
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{width:100%;height:100%;overflow:hidden;background:#13100c;touch-action:none;overscroll-behavior:none;font-family:system-ui,-apple-system,sans-serif}
   #cv{display:block;width:100vw;height:100vh}
-  #hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:0;right:0;display:flex;justify-content:center;gap:10px;pointer-events:none;z-index:5}
-  .pill{background:rgba(20,14,8,.72);border:1px solid #6a4e2a;border-radius:12px;padding:6px 12px;color:#ffe6b0;font-size:13px;font-weight:800;text-align:center;min-width:64px}
-  .pill b{display:block;font-size:19px;color:#fff}
-  #wind{position:fixed;top:calc(env(safe-area-inset-top,0px) + 70px);left:0;right:0;text-align:center;color:#9fd0ff;font-size:14px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:18px}
-  #hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);left:0;right:0;text-align:center;color:#ffe14d;font-size:16px;font-weight:800;text-shadow:0 2px 4px #000;pointer-events:none;z-index:5}
-  #msg{position:fixed;top:46%;left:0;right:0;text-align:center;font-size:30px;font-weight:900;color:#fff;text-shadow:0 3px 6px #000;opacity:0;transition:opacity .15s;pointer-events:none;z-index:6}
-  #sub{position:fixed;top:54%;left:0;right:0;text-align:center;font-size:15px;font-weight:700;color:#ffe6b0;text-shadow:0 2px 4px #000;opacity:0;transition:opacity .15s;pointer-events:none;z-index:6}
-  #ver{position:fixed;bottom:4px;left:0;right:0;text-align:center;color:#8a765a;font-size:11px;z-index:5;pointer-events:none}
-  .ov{position:fixed;inset:0;z-index:12;background:radial-gradient(120% 90% at 50% 25%,#3a281700,#160f08 92%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px}
-  .ov h1{font-size:40px;color:#ffcf5c;text-shadow:0 0 10px #a35,0 3px 0 #7a4b12;letter-spacing:2px}
-  .ov p{font-size:14px;color:#e9d6bf;line-height:1.7}
-  .btn{pointer-events:auto;background:#ffcf5c;color:#5a3a10;font-size:22px;font-weight:900;border:none;border-radius:16px;padding:15px 48px;box-shadow:0 6px 0 #b5831f;cursor:pointer}
+  #hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none;z-index:5}
+  .pill{background:rgba(20,14,8,.72);border:1px solid #6a4e2a;border-radius:12px;padding:5px 9px;color:#ffe6b0;font-size:11px;font-weight:800;text-align:center;min-width:52px}
+  .pill b{display:block;font-size:18px;color:#fff;line-height:1.15}
+  #bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 56px);left:0;right:0;text-align:center;pointer-events:none;z-index:5}
+  #quiver{color:#ffe6b0;font-size:15px;font-weight:800;text-shadow:0 2px 3px #000;letter-spacing:1px}
+  #quiver .spent{opacity:.22}
+  #goal{color:#aef5b0;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000}
+  #goal.done{color:#ffe14d}
+  #wind{position:fixed;top:calc(env(safe-area-inset-top,0px) + 98px);left:0;right:0;text-align:center;color:#9fd0ff;font-size:13px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:16px}
+  #mod{position:fixed;top:calc(env(safe-area-inset-top,0px) + 118px);left:0;right:0;text-align:center;color:#ffbe6b;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:15px}
+  #hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);left:0;right:0;text-align:center;color:#ffe14d;font-size:15px;font-weight:800;text-shadow:0 2px 4px #000;pointer-events:none;z-index:5}
+  #msg{position:fixed;top:42%;left:0;right:0;text-align:center;font-size:29px;font-weight:900;color:#fff;text-shadow:0 3px 6px #000;opacity:0;transition:opacity .12s;pointer-events:none;z-index:6}
+  #sub{position:fixed;top:50%;left:0;right:0;text-align:center;font-size:14px;font-weight:700;color:#ffe6b0;text-shadow:0 2px 4px #000;opacity:0;transition:opacity .12s;pointer-events:none;z-index:6}
+  #toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,20,10,.94);border:1px solid #ffcf5c;border-radius:14px;padding:9px 16px;color:#ffe14d;font-size:13px;font-weight:800;opacity:0;transition:all .25s;pointer-events:none;z-index:9;white-space:nowrap}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  #ver{position:fixed;bottom:3px;left:0;right:0;text-align:center;color:#8a765a;font-size:10px;z-index:5;pointer-events:none}
+  .ov{position:fixed;inset:0;z-index:12;background:radial-gradient(120% 90% at 50% 25%,#3a281700,#160f08 92%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;text-align:center;padding:22px}
+  .ov h1{font-size:36px;color:#ffcf5c;text-shadow:0 0 10px #a35,0 3px 0 #7a4b12;letter-spacing:2px}
+  .ov p{font-size:13px;color:#e9d6bf;line-height:1.75}
+  .btn{pointer-events:auto;background:#ffcf5c;color:#5a3a10;font-size:21px;font-weight:900;border:none;border-radius:16px;padding:14px 46px;box-shadow:0 6px 0 #b5831f;cursor:pointer}
+  .btn2{pointer-events:auto;background:#2f7a4d;color:#fff;font-size:16px;font-weight:800;border:none;border-radius:14px;padding:11px 24px;box-shadow:0 5px 0 #1d5033;cursor:pointer}
   .hidden{display:none!important}
+  #how{display:flex;gap:8px;justify-content:center}
+  #how div{background:rgba(255,255,255,.06);border:1px solid #6a4e2a;border-radius:12px;padding:9px 8px;width:92px;font-size:11px;color:#e9d6bf;line-height:1.5}
+  #how div b{display:block;font-size:15px;color:#ffcf5c;margin-bottom:3px}
+  .rec{font-size:12px;color:#caa15a;font-weight:800}
+  #btns{position:fixed;top:calc(env(safe-area-inset-top,0px) + 50px);right:8px;display:flex;flex-direction:column;gap:7px;z-index:8}
+  .iconbtn{pointer-events:auto;background:rgba(20,14,8,.72);border:1px solid #6a4e2a;border-radius:10px;color:#ffe6b0;font-size:17px;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  #rotate{display:none;position:fixed;inset:0;z-index:30;background:#13100c;color:#ffe6b0;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;font-weight:800;font-size:18px;padding:30px}
+  #rotate .ico{font-size:58px;animation:rot 1.6s ease-in-out infinite}
+  @keyframes rot{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
+  @media (orientation:landscape){ #rotate{display:flex} }
+  .has-banner #ver{display:none}
 </style></head>
 <body>
 <canvas id="cv"></canvas>
@@ -28,158 +48,494 @@
   <div class="pill">단계<b id="stage">1</b></div>
   <div class="pill">최고<b id="best">0</b></div>
 </div>
+<div id="bar">
+  <div id="quiver"></div>
+  <div id="goal"></div>
+</div>
+<div id="btns">
+  <button class="iconbtn" id="muteBtn">🔊</button>
+  <button class="iconbtn" id="pauseBtn">⏸</button>
+</div>
 <div id="wind"></div>
+<div id="mod"></div>
 <div id="hint"></div>
 <div id="msg"></div>
 <div id="sub"></div>
-<div id="ver">모두의 화살촉 v0.2 · 조준→파워 2탭, 항아리에 화살 넣기</div>
+<div id="toast"></div>
+<div id="ver">모두의 화살촉 v0.3 · 관(貫)·귀(耳) 3구역 · 5발 단계제</div>
+
 <div id="start" class="ov">
   <h1>🏹 모두의 화살촉</h1>
-  <p><b>투호(投壺)</b> — 화살을 던져 항아리에 넣는 전통놀이.<br/>
-  ① <b>탭</b>해서 <b>각도</b> 멈추기 → ② <b>탭</b>해서 <b>힘</b> 멈추기<br/>
-  포물선으로 날아가 <b>항아리 입구</b>에 쏙 들어가면 성공! 🎯<br/>
-  바람·거리를 읽어 <b>한 끗</b>을 맞춰요. 단계 오를수록 멀고 좁아져요.</p>
+  <div id="how">
+    <div><b>① 탭</b>각도 멈추기<br>궤적 <u>모양</u>을 고름</div>
+    <div><b>② 탭</b>힘 멈추기<br>흰 <u>점선</u>에 맞춤</div>
+    <div><b>항아리</b>관 ×2.5<br>귀 ×2</div>
+  </div>
+  <p><b>투호(投壺)</b> — 화살 <b>5발</b>로 한 단계.<br/>
+  목표 수만큼 넣으면 다음 단계로! 빗나간 화살은 <b>바람을 읽는 단서</b>가 돼요.<br/>
+  높이 띄우면 <b>안전하게 꽂히고</b>, 낮게 쏘면 <b>바람에 덜 밀려요</b>.</p>
   <button class="btn" id="startBtn">시작</button>
+  <div class="rec" id="startRec"></div>
 </div>
+
+<div id="over" class="ov hidden">
+  <h1>게임 오버</h1>
+  <p id="overSub">기록을 남겼어요!</p>
+  <button class="btn2" id="continueBtn">📺 광고 보고 이어하기 (화살 +3)</button>
+  <button class="btn" id="overBtn">다시 하기</button>
+</div>
+
+<div id="rotate">
+  <div class="ico">📱↻</div>
+  <div>세로로 돌려주세요</div>
+  <div style="font-size:13px;color:#9a8666">모두의 화살촉은 세로 화면 게임이에요</div>
+</div>
+
 <script>
+/* ============================================================
+   모두의 화살촉 (투호) v0.3
+   - 과녁 3구역: 중앙(들어감/관) + 좌우 귀(耳)
+   - 한 단계 = 화살 5발, 목표 수 달성 시 통과 (빗나감은 사격 단서)
+   - 각도 = 궤적 모양(진입각) / 힘 = 거리  → 역할 분리
+   - 입구 통과 판정을 보간으로 정밀화, 몸통 충돌 실루엣 기반
+   ============================================================ */
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 let W=0,H=0,DPR=1;
 function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=innerWidth; H=innerHeight; cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
-addEventListener('resize',resize); resize();
+addEventListener('resize',()=>{ resize(); if(typeof layoutStage==='function'&&pot) layoutStage(); }); resize();
 const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 
 // ---- audio ----
-let AC=null;
+let AC=null, muted=false;
 function initAudio(){ if(!AC){ try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended')AC.resume(); }
-function tone(f,d,t,g,slide){ if(!AC)return; const o=AC.createOscillator(),v=AC.createGain(); o.type=t||'sine'; o.frequency.value=f; if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(1,slide),AC.currentTime+d); v.gain.value=g||0.12; v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+d); o.connect(v);v.connect(AC.destination); o.start();o.stop(AC.currentTime+d); }
-const sfx={ swing(){tone(300,0.2,'sine',0.07,620);}, lock(){tone(620,0.05,'square',0.08);}, in(){[660,880,1180].forEach((f,i)=>setTimeout(()=>tone(f,0.14,'triangle',0.16),i*70));}, clink(){tone(1200,0.07,'square',0.1,500);}, miss(){tone(180,0.28,'sawtooth',0.14,80);}, vib(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}} };
+function tone(f,d,t,g,slide){ if(!AC||muted)return; const o=AC.createOscillator(),v=AC.createGain(); o.type=t||'sine'; o.frequency.value=f; if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(1,slide),AC.currentTime+d); v.gain.value=g||0.12; v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+d); o.connect(v);v.connect(AC.destination); o.start();o.stop(AC.currentTime+d); }
+const sfx={
+  lock(){tone(620,0.05,'square',0.08);},
+  shoot(){tone(880,0.08,'square',0.1,420);},
+  in(){[660,880,1180].forEach((f,i)=>setTimeout(()=>tone(f,0.14,'triangle',0.16),i*70));},
+  gwan(){[784,988,1318,1568].forEach((f,i)=>setTimeout(()=>tone(f,0.16,'triangle',0.18),i*65));},
+  ear(){[520,780,1040].forEach((f,i)=>setTimeout(()=>tone(f,0.12,'square',0.12),i*60));},
+  teeter(){[1500,1200,900,1400].forEach((f,i)=>setTimeout(()=>tone(f,0.07,'sine',0.09),i*90));},
+  clink(){tone(1200,0.07,'square',0.1,500);},
+  thud(){tone(150,0.16,'sine',0.12,70);},
+  miss(){tone(180,0.26,'sawtooth',0.12,80);},
+  clear(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.2,'triangle',0.16),i*110));},
+  slow(){tone(300,0.3,'sine',0.05,240);},
+  vib(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
+};
 
-// ---- state ----
-let state='start';  // start | aim | power | fly | result
-let score=0, combo=0, best=0, stage=1;
+// ---- 저장 데이터 ----
+let best=0, meta={bestStage:1,totalIn:0,ach:{}};
 try{ best=parseInt(localStorage.getItem('tuho_best')||'0')||0; }catch(e){}
-let angle=45, aDir=1;        // 조준 각도(도), 핑퐁
+try{ const m=JSON.parse(localStorage.getItem('tuho_meta')||'null'); if(m) meta=Object.assign(meta,m); }catch(e){}
+function saveMeta(){ try{ localStorage.setItem('tuho_meta',JSON.stringify(meta)); }catch(e){} }
+function saveBest(){ try{ localStorage.setItem('tuho_best',best); }catch(e){} }
+
+// ---- 업적 ----
+const ACH=[
+  {id:'in1',   t:'첫 투호',       d:'화살을 처음 넣었다'},
+  {id:'gwan',  t:'관(貫)!',      d:'정중앙에 꽂았다'},
+  {id:'ear',   t:'귀(耳) 명인',   d:'항아리 귀에 넣었다'},
+  {id:'hankut',t:'한 끗',        d:'턱에 걸렸다가 들어갔다'},
+  {id:'c5',    t:'오연발',       d:'5연속 성공'},
+  {id:'all5',  t:'전관(全貫)',    d:'한 단계 5발 전부 성공'},
+  {id:'s10',   t:'십단 궁사',     d:'10단계 도달'},
+  {id:'s20',   t:'투호 신선',     d:'20단계 도달'}
+];
+let toastQ=[], toastT=0;
+function unlock(id){ if(meta.ach[id])return; meta.ach[id]=1; saveMeta(); const a=ACH.find(x=>x.id===id); if(a) toastQ.push('🏅 '+a.t+' — '+a.d); }
+function pumpToast(dt){
+  const el=$('toast');
+  if(toastT>0){ toastT-=dt; if(toastT<=0) el.classList.remove('on'); return; }
+  if(toastQ.length && !el.classList.contains('on')){ el.textContent=toastQ.shift(); el.classList.add('on'); toastT=2.0; }
+}
+
+// ---- 단계 변주(모디파이어) ----
+const MODS=[
+  {id:'wind',  icon:'💨', name:'강풍',        desc:'바람이 거세다',              f:m=>{m.windMul=1.8; m.scoreMul=1.3;}},
+  {id:'sway',  icon:'🏺', name:'흔들 항아리',  desc:'항아리가 좌우로 움직인다',     f:m=>{m.sway=1; m.scoreMul=1.5;}},
+  {id:'narrow',icon:'🎯', name:'좁은 입구',    desc:'입구가 더 좁다',             f:m=>{m.mouthMul=0.8; m.scoreMul=1.6;}},
+  {id:'night', icon:'🌙', name:'밤',          desc:'달빛만 남았다',              f:m=>{m.night=1; m.scoreMul=1.4;}},
+  {id:'fog',   icon:'🌫', name:'안개',        desc:'조준선이 짧게 보인다',        f:m=>{m.preview=0.42; m.scoreMul=1.7;}},
+  {id:'gold',  icon:'🥇', name:'황금 항아리',  desc:'점수 2배 보상 단계',          f:m=>{m.gold=1; m.scoreMul=2;}}
+];
+
+// ---- 게임 상태 ----
+let state='start';  // start | aim | power | fly | result | clear | over
+let score=0, combo=0, stage=1;
+let arrowsLeft=5, arrowsTotal=5, inCount=0, quota=1, stageScore=0;
+let angle=28, aDir=1;        // 조준 각도(도), 핑퐁
 let power=0, pDir=1;         // 파워 0..1 핑퐁
-let wind=0;                  // 가로 바람(px/s^2 가속), +=오른쪽
-let arrow=null;             // {x,y,vx,vy,ang,stuck,dead}
-let trail=[];
-let parts=[];
-let resultT=0, shake=0, gt=0, lastTs=0;
-let msgT=0;
+let wind=0;                  // 가로 바람 가속(px/s^2), + = 오른쪽
+let arrow=null, trail=[], parts=[];
+let stuck=[], ground=[];     // 항아리에 꽂힌 화살 / 땅에 박힌 화살 (단계별 누적 = 탄착군 단서)
+let lastCross=null;          // 직전 발의 입구면 통과 지점 (보정 단서)
+let resultT=0, clearT=0, shake=0, gt=0, lastTs=0, flash=0;
+let slowT=0, paused=false;
+let mod={};                  // 현재 단계 변주
+let lastResult='';
+let continuedThisRun=false;
 
-// geometry (resize 비례)
-function groundY(){ return H*0.80; }
-function originX(){ return W*0.12; }
+// ---- AdMob (Capacitor 네이티브 앱에서만 동작; 웹/터널은 무시) ----
+// ⚠️ 아래는 구글 '테스트' 광고단위. 출시(프로덕션) 전 실제 AdMob ID로 교체 필수!
+const AD_USE_TEST = true;
+const AD_BANNER = AD_USE_TEST ? 'ca-app-pub-3940256099942544/6300978111' : '';
+const AD_INTER  = AD_USE_TEST ? 'ca-app-pub-3940256099942544/1033173712' : '';
+const AD_REWARD = AD_USE_TEST ? 'ca-app-pub-3940256099942544/5224354917' : '';
+let admobReady=false, bannerShown=false, interCount=0;
+function admob(){ const C=window.Capacitor; return (C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.AdMob)?C.Plugins.AdMob:null; }
+(async function(){ const A=admob(); if(!A)return; try{ await A.initialize({initializeForTesting:AD_USE_TEST}); admobReady=true; showBanner(); }catch(e){} })();
+async function showBanner(){ const A=admob(); if(!A||bannerShown)return; bannerShown=true; try{document.body.classList.add('has-banner');}catch(e){} try{ await A.showBanner({adId:AD_BANNER,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0,isTesting:AD_USE_TEST}); }catch(e){ bannerShown=false; try{document.body.classList.remove('has-banner');}catch(e2){} } }
+async function showInterstitial(){ const A=admob(); if(!(admobReady&&A))return; try{ await A.prepareInterstitial({adId:AD_INTER,isTesting:AD_USE_TEST}); await A.showInterstitial(); }catch(e){} }
+async function showRewarded(){ const A=admob(); if(!A) return true; /* 웹: 광고없음→보상지급(개발편의) */ try{ await A.prepareRewardVideoAd({adId:AD_REWARD,isTesting:AD_USE_TEST}); const r=await A.showRewardVideoAd(); return !!r; }catch(e){ return false; } }
+function bottomRes(){ return bannerShown ? 64 : 0; }
+
+// ---- 지오메트리 / 물리 (화면 비례) ----
+function groundY(){ return H*0.78; }
+function originX(){ return W*0.13; }
 function originY(){ return groundY()-14; }
-let pot={x:0,rimY:0,w:0,h:0,mouth:0};
-const G=1400;               // 중력 px/s^2
-const VMAX=1550;            // 최대 발사속도 px/s
-const AMIN=28, AMAX=72;     // 각도 범위
+function gravity(){ return H*1.9; }
+const AMAX=72;              // 최대 각도(도). 최소 각도는 단계마다 계산(aLo)
+const PHI_MIN=26;           // 입구 최소 진입각(도) — 이보다 얕은 각도는 '함정'이라 아예 제외
+let aLo=46, vLo=0, vHi=0;   // 단계별 조준 가능 각도 / 파워 게이지 속도 구간
+function speedOf(p){ return vLo+(vHi-vLo)*p; }
+let pot={x:0,baseX:0,rimY:0,w:0,h:0,mouth:0,earW:0,earOff:0};
 
+// 이상 궤적이 입구면에 닿을 때의 진입 기울기(tanφ). 각도가 유효하지 않으면 null
+function entryTan(a){
+  const th=a*Math.PI/180, d=pot.baseX-originX(), rise=pot.h-14;
+  const v=solveSpeed(d,rise,th); if(v==null) return null;
+  const c=Math.cos(th);
+  return gravity()*d/(v*v*c*c) - Math.tan(th);
+}
+// 단계 보정: ① 함정 각도 제거 ② 필요 파워가 게이지 중앙부에 오도록 속도 구간 재설정
+function calibrate(){
+  const tMin=Math.tan(PHI_MIN*Math.PI/180);
+  aLo=null;
+  for(let a=30;a<=AMAX;a++){ const t=entryTan(a); if(t!=null && t>=tMin){ aLo=a; break; } }
+  if(aLo==null) aLo=AMAX-12;
+  let mn=Infinity, mx=0;
+  const d=pot.baseX-originX(), rise=pot.h-14;
+  for(let a=aLo;a<=AMAX;a++){ const v=solveSpeed(d,rise,a*Math.PI/180); if(v==null)continue; if(v<mn)mn=v; if(v>mx)mx=v; }
+  if(!isFinite(mn)||mn<=0){ mn=Math.sqrt(gravity()*W); mx=mn*1.2; }
+  vLo = mn*0.86;                                  // 아래쪽 구간은 '힘 부족'(짧게 떨어짐)
+  vHi = Math.max(mx*1.03, mn*1.16);
+}
+
+// 화면 크기·단계에 맞춰 항아리 형상과 보정값만 다시 계산 (진행 상황은 유지 → resize 안전)
+function layoutStage(){
+  const s=stage;
+  pot.h = Math.min(H*0.15, 76 + s*1.6);
+  pot.w = Math.max(66, 104 - s*2);
+  pot.mouth = Math.max(34, 58 - s*1.7) * (mod.mouthMul||1);
+  pot.earW  = pot.mouth*0.30;
+  pot.earOff= pot.mouth*0.5 + pot.mouth*0.10 + pot.earW*0.5;
+  pot.baseX = Math.min(W*0.80, W*0.52 + s*W*0.013);
+  pot.x = pot.baseX;
+  pot.rimY = groundY()-pot.h;
+  calibrate();
+  if(state==='aim') angle=clamp(angle,aLo,AMAX);
+}
 function setupStage(){
   const s=stage;
-  pot.h = Math.min(H*0.16, 74 + s*2);
-  pot.w = Math.max(54, 92 - s*2);
-  pot.mouth = Math.max(26, 54 - s*2.2);               // 입구 너비(좁아짐)
-  const far = Math.min(W*0.82, W*0.54 + s*W*0.016);    // 점점 멀리
-  pot.x = far;
-  pot.rimY = groundY()-pot.h;
+  mod={windMul:1,scoreMul:1,mouthMul:1,preview:1,sway:0,night:0,gold:0,pick:null,pick2:null};
+  if(s>=4){
+    let pool=MODS.filter(m=>m.id!==(setupStage.prev||''));
+    const p=pool[Math.floor(Math.random()*pool.length)];
+    setupStage.prev=p.id; mod.pick=p; p.f(mod);
+    if(s>=15){                                   // 후반: 변주 2중 — 난이도가 평탄해지지 않도록
+      const pool2=MODS.filter(m=>m.id!==p.id && m.id!=='gold');
+      const q=pool2[Math.floor(Math.random()*pool2.length)];
+      mod.pick2=q; q.f(mod);
+    }
+  } else setupStage.prev='';
+
+  layoutStage();
+
   wind = 0;
-  if(s>=2){ wind = (Math.random()*2-1)*(30+Math.min(140, s*12)); if(Math.abs(wind)<20) wind = wind<0?-20:20; }
-  $('wind').textContent = (s>=2 && Math.abs(wind)>1) ? ('💨 바람 '+(wind>0?'→ 오른쪽':'← 왼쪽')+' 세기 '+Math.round(Math.abs(wind)/12)) : '바람 없음';
+  if(s>=3){
+    wind = (Math.random()*2-1)*(28+Math.min(170, s*9))*mod.windMul;
+    if(Math.abs(wind)<22) wind = wind<0?-22:22;
+  }
+  arrowsTotal = s>=10 ? 6 : 5;   // 후반엔 화살 1발 더
+  arrowsLeft = arrowsTotal;
+  inCount = 0; stageScore = 0;
+  quota = s<=2 ? 1 : s<=8 ? 2 : s<=16 ? 3 : 4;
+  stuck=[]; ground=[]; lastCross=null;
+  paintBar();
 }
-function newThrow(){
-  setupStage();
-  angle=AMIN; aDir=1; power=0; pDir=1; arrow=null; trail=[];
-  state='aim'; $('hint').textContent='① 탭 — 각도 멈추기'; clearMsg();
+function previewFrac(){ return clamp((stage<=2?1:1-(stage-2)*0.05), 0.4, 1) * mod.preview; }
+function powerSpeed(){ return Math.min(1.0, 0.52+stage*0.022); }
+function swayAmp(){ return Math.min(W*0.042, 8+stage*0.5); }
+const SWAY_W=1.1;
+function potAt(t){ return mod.sway ? pot.baseX + Math.sin((gt+t)*SWAY_W)*swayAmp() : pot.baseX; }
+// 흔들 항아리에서는 '화살이 도착할 때의 위치'를 겨냥해야 한다 → 선행 지점을 반복 계산
+function targetX(){
+  if(!mod.sway) return pot.x;
+  let tx=pot.x, th=angle*Math.PI/180;
+  for(let i=0;i<3;i++){
+    const v=solveSpeed(tx-originX(), pot.h-14, th); if(v==null) break;
+    tx = potAt((tx-originX())/(Math.cos(th)*v));
+  }
+  return tx;
 }
+
+// ---- 항아리 형상 헬퍼 ----
+function bodyHalf(y){            // 항아리 실루엣 반폭 (충돌용)
+  const t=(y-pot.rimY)/pot.h; if(t<0||t>1) return 0;
+  const k = t<0.5 ? t/0.5 : 1-((t-0.5)/0.5)*0.40;
+  return pot.mouth/2 + (pot.w/2 - pot.mouth/2)*k;
+}
+// 진입각이 얕으면 목(neck) 안쪽 턱에 걸린다 → 유효 입구가 좁아짐
+function mouthWindow(tanPhi){ return Math.max(pot.mouth*0.26, pot.mouth - (pot.mouth*0.30)/tanPhi); }
+function earWindow(tanPhi){ return Math.max(pot.earW*0.32, pot.earW - (pot.earW*0.55)/tanPhi); }
+
+// ---- 탄도 계산 ----
+// 거리 d, 고도차 rise(타깃이 위로 +), 각도 th 로 명중시키는 속도. 불가면 null
+function solveSpeed(d,rise,th){
+  const c=Math.cos(th), t=Math.tan(th), den=2*c*c*(d*t-rise);
+  if(den<=0 || d<=0) return null;
+  return Math.sqrt(gravity()*d*d/den);
+}
+function idealPower(){
+  const v=solveSpeed(targetX()-originX(), pot.h-14, angle*Math.PI/180);
+  if(v==null) return null;
+  const p=(v-vLo)/(vHi-vLo);
+  return (p<0||p>1.02) ? null : clamp(p,0,1);
+}
+function simArc(th,sp,frac,withWind){
+  const pts=[]; let x=originX(),y=originY(),vx=Math.cos(th)*sp,vy=-Math.sin(th)*sp;
+  const g=gravity(), h=1/72, n=Math.floor(170*frac);
+  for(let i=0;i<n;i++){
+    vy+=g*h; if(withWind)vx+=wind*h; x+=vx*h; y+=vy*h;
+    if(y>groundY()+2||x>W+12) { pts.push({x,y,end:1}); break; }
+    if(i%2===0) pts.push({x,y});
+  }
+  return pts;
+}
+
+// ---- UI ----
 function clearMsg(){ $('msg').style.opacity=0; $('sub').style.opacity=0; }
 function showMsg(t,c){ const m=$('msg'); m.textContent=t; m.style.color=c||'#fff'; m.style.opacity=1; }
 function showSub(t){ const s=$('sub'); s.textContent=t||''; s.style.opacity=t?1:0; }
 function setTop(){ $('score').textContent=score; $('combo').textContent=combo; $('stage').textContent=stage; $('best').textContent=best; }
+function paintBar(){
+  let q=''; for(let i=0;i<arrowsTotal;i++) q += (i<arrowsLeft) ? '🏹' : '<span class="spent">🏹</span>';
+  $('quiver').innerHTML=q;
+  const g=$('goal'); const done=inCount>=quota;
+  g.textContent = (done?'✔ 통과 확정 ':'목표 ')+inCount+' / '+quota+(done?' · 남은 화살은 보너스!':' 넣기');
+  g.className = done?'done':'';
+  $('wind').textContent = (Math.abs(wind)>1)
+    ? ('💨 바람 '+(wind>0?'→':'←')+' '+'▮'.repeat(clamp(Math.round(Math.abs(wind)/32),1,6)))
+    : '바람 없음';
+  $('mod').textContent = mod.pick
+    ? (mod.pick.icon+' '+mod.pick.name+(mod.pick2?' + '+mod.pick2.icon+' '+mod.pick2.name:' — '+mod.pick.desc)
+       +(mod.scoreMul>1?'  (점수 ×'+(Math.round(mod.scoreMul*10)/10)+')':''))
+    : '';
+}
+
+// ---- 진행 ----
+function newArrow(){
+  angle=aLo; aDir=1; power=0; pDir=1; arrow=null; trail=[]; slowT=0;
+  state='aim'; $('hint').textContent='① 탭 — 각도(궤적 모양) 멈추기'; clearMsg(); paintBar();
+}
+function nextStage(){ stage++; if(stage>meta.bestStage){meta.bestStage=stage; saveMeta();}
+  if(stage>=10)unlock('s10'); if(stage>=20)unlock('s20');
+  setupStage(); newArrow(); setTop(); }
 
 function launch(){
-  const a=angle*Math.PI/180, sp=VMAX*power;
-  arrow={ x:originX(), y:originY(), vx:Math.cos(a)*sp, vy:-Math.sin(a)*sp, ang:-a, stuck:false, dead:false, py:originY() };
-  state='fly'; $('hint').textContent=''; sfx.vib([8,24]); tone(880,0.08,'square',0.1);
+  const a=angle*Math.PI/180, sp=speedOf(power);
+  arrow={ x:originX(), y:originY(), px:originX(), py:originY(), vx:Math.cos(a)*sp, vy:-Math.sin(a)*sp, ang:-a, noPot:false, hitBody:false };
+  arrowsLeft--; state='fly'; $('hint').textContent=''; sfx.vib([8,24]); sfx.shoot(); paintBar();
 }
-
 function tap(){
+  if(paused||state==='over'||state==='clear')return;
   initAudio();
-  if(state==='aim'){ state='power'; power=0; pDir=1; $('hint').textContent='② 탭 — 힘 멈추기 (조준선 참고)'; sfx.lock(); sfx.vib(8); }
+  if(state==='aim'){ state='power'; power=0; pDir=1; $('hint').textContent='② 탭 — 힘 멈추기 (흰 점선에 맞추기)'; sfx.lock(); sfx.vib(8); }
   else if(state==='power'){ sfx.lock(); launch(); }
-  else if(state==='result'){ if(resultT<0.4) return; nextThrow(); }
+  else if(state==='result'){ if(resultT<0.35) return; afterResult(); }
 }
-function nextThrow(){ newThrow(); }
+function afterResult(){
+  clearMsg();
+  if(arrowsLeft>0){ newArrow(); return; }
+  if(inCount>=quota) stageClear(); else gameOver();
+}
+function stageClear(){
+  state='clear'; clearT=0;
+  const perfect = inCount>=5;
+  let bonus = Math.round((20+stage*9) * (perfect?2:1) * mod.scoreMul);
+  score += bonus; stageScore += bonus;
+  if(perfect) unlock('all5');
+  if(score>best){ best=score; saveBest(); }
+  showMsg(perfect?'전관(全貫)! 🏺✨':'단계 통과! 🎊', perfect?'#ffe14d':'#aef5b0');
+  showSub((perfect?'5발 전부 명중 보너스 ×2 · ':'')+'통과 보너스 +'+bonus+'점 · 이번 단계 '+stageScore+'점');
+  sfx.clear(); sfx.vib([20,40,20,40]); flash=0.5;
+  for(let i=0;i<60;i++){ const a=Math.random()*Math.PI*2, sp=2+Math.random()*6;
+    parts.push({x:pot.x,y:pot.rimY,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-4,life:1.3,r:2+Math.random()*3,c:['#ffe14d','#fff','#ffcf5c','#ff9a4a','#aef5b0'][i%5]}); }
+  setTop();
+}
+function gameOver(){
+  state='over'; clearMsg(); arrow=null; trail=[]; interCount++;
+  const rec = score>=best && score>0;
+  if(score>best){ best=score; saveBest(); }
+  $('overSub').innerHTML='최종 <b>'+score+'</b>점 · '+stage+'단계에서 멈춤<br>'
+    +'마지막 단계 '+inCount+'/'+quota+' 넣음 · 최고 '+best+(rec?' 🏆 <b>신기록!</b>':'');
+  $('continueBtn').style.display = continuedThisRun ? 'none' : 'block';
+  $('over').classList.remove('hidden');
+  sfx.miss(); sfx.vib([40,60,40]);
+}
 
 // ---- 판정 ----
-function finishIn(perfect){
-  state='result'; resultT=0;
-  const gain=Math.round((10+stage*4)*(perfect?2:1)); score+=gain; combo++;
-  if(score>best){ best=score; try{localStorage.setItem('tuho_best',best);}catch(e){} }
-  stage++;
-  showMsg(perfect?'명중! 한가운데! 🎯':'들어갔다! 🏺', perfect?'#ffe14d':'#aef5b0');
-  showSub((perfect?'✨완벽 x2 ':'')+'+'+gain+'점 · 연속 '+combo+' · 다음 단계!');
-  sfx.in(); sfx.vib([15,40,20]); shake=8;
-  for(let i=0;i<40;i++){ const a=Math.random()*Math.PI*2, sp=2+Math.random()*5; parts.push({x:pot.x,y:pot.rimY,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,life:0.9,r:2+Math.random()*3,c:['#ffe14d','#fff','#ffcf5c','#ff9a4a'][i%4]}); }
-  setTop();
+function judge(cx,tanPhi){
+  const e=Math.abs(cx-pot.x);
+  const win=mouthWindow(tanPhi), ew=earWindow(tanPhi);
+  if(e<=win/2) return (e<=win*0.17) ? {z:'gwan'} : {z:'in'};
+  if(e<=win/2+Math.max(2.5,pot.mouth*0.07)) return {z:'teeter'};
+  if(Math.abs(e-pot.earOff)<=ew/2) return {z:'ear',side:cx<pot.x?-1:1};
+  if(e<=pot.earOff+pot.earW/2+2) return {z:'rim'};
+  return null;  // 입구면을 벗어남 → 몸통/땅 판정으로
 }
-function finishMiss(near,where){
-  state='result'; resultT=0; combo=0;
-  showMsg(near?'아깝다! 한 끗! 😫':'빗나감 😵', near?'#ff7a7a':'#ff9a9a');
-  showSub(near?(where+' — 입구 바로 옆!! 다시!'):(where+' · 연속 끊김'));
-  sfx.miss(); sfx.vib(near?[30,30,50]:50); if(near){shake=6;}
-  setTop();
+const ZONE={
+  gwan:  {mul:2.5, msg:'관(貫)! 정중앙 🎯', col:'#ffe14d'},
+  in:    {mul:1.0, msg:'들어갔다! 🏺',       col:'#aef5b0'},
+  ear:   {mul:2.0, msg:'귀(耳)에 꽂혔다! 👂', col:'#9fd0ff'},
+  teeter:{mul:1.5, msg:'한 끗! 턱에서 쏙!! 😮', col:'#ffb14d'}
+};
+function finishIn(z,cx,tanPhi){
+  const Z=ZONE[z]; combo++; inCount++;
+  meta.totalIn++; if(meta.totalIn===1)unlock('in1'); saveMeta();
+  if(z==='gwan')unlock('gwan'); if(z==='ear')unlock('ear'); if(z==='teeter')unlock('hankut');
+  if(combo>=5)unlock('c5');
+  const comboMul = 1 + Math.min(10,combo)*0.1;
+  const gain = Math.round((10+stage*3) * Z.mul * comboMul * mod.scoreMul);
+  score += gain; stageScore += gain;
+  if(score>best){ best=score; saveBest(); }
+  state='result'; resultT=0; lastResult='in';
+  showMsg(Z.msg, Z.col);
+  showSub('+'+gain+'점  ·  '+Math.round(Z.mul*10)/10+'배 × 연속'+combo+'('+(Math.round(comboMul*10)/10)+'배)'
+    +(mod.scoreMul>1?' × 변주'+mod.scoreMul+'배':'')+'  ·  '+inCount+'/'+quota);
+  if(z==='gwan')sfx.gwan(); else if(z==='ear')sfx.ear(); else if(z==='teeter')sfx.teeter(); else sfx.in();
+  sfx.vib(z==='gwan'?[15,40,20,60]:[15,40,20]); shake=z==='gwan'?10:7; flash=z==='gwan'?0.35:0.2;
+  // 항아리에 꽂힌 화살 누적
+  const ox = z==='ear' ? (cx<pot.x?-pot.earOff:pot.earOff) : clamp(cx-pot.x,-pot.mouth*0.38,pot.mouth*0.38);
+  stuck.push({ox:ox, tilt:(Math.random()*0.26-0.13) - (1/Math.max(1,tanPhi))*0.25, z:z});
+  lastCross={x:cx,ok:1};
+  const n = z==='gwan'?46:30;
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, sp=2+Math.random()*5;
+    parts.push({x:cx,y:pot.rimY,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,life:0.95,r:2+Math.random()*3,c:['#ffe14d','#fff','#ffcf5c','#ff9a4a'][i%4]}); }
+  setTop(); paintBar();
+}
+function finishMiss(kind,cx){
+  combo=0; state='result'; resultT=0; lastResult='miss';
+  const left=arrowsLeft, need=Math.max(0,quota-inCount);
+  const T={
+    short:['짧았어요 😵','힘이 모자랐어요'],
+    long :['넘어갔어요 😵','힘이 셌어요'],
+    rim  :['턱 맞고 튕김 😫','한 끗 모자랐어요'],
+    flat :['너무 평평해요 😫','더 띄워야 턱을 넘어요'],
+    body :['항아리 몸통 💥','조금 더 멀리'],
+    out  :['멀리 날아갔어요 😵','힘을 줄여요']
+  }[kind]||['빗나감 😵',''];
+  showMsg(T[0], '#ff9a9a');
+  showSub(T[1]+' · 남은 화살 '+left+'발'+(need>0?' / '+need+'발 더 필요':' · 통과 확정'));
+  sfx.vib(40); if(kind==='rim'||kind==='flat'){shake=6;}
+  if(cx!=null) lastCross={x:cx,ok:0};
+  setTop(); paintBar();
 }
 
 // ---- update ----
 function update(dt){
-  gt+=dt; if(shake>0)shake=Math.max(0,shake-dt*40);
-  for(const p of parts){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.22; p.life-=dt; } parts=parts.filter(p=>p.life>0);
-  if(state==='aim'){ angle+=aDir*dt*42; if(angle>=AMAX){angle=AMAX;aDir=-1;} else if(angle<=AMIN){angle=AMIN;aDir=1;} }
-  else if(state==='power'){ const spd=1.15+Math.min(0.9,stage*0.05); power+=pDir*dt*spd; if(power>=1){power=1;pDir=-1;} else if(power<=0){power=0;pDir=1;} }
-  else if(state==='fly'){
-    const steps=4, h=dt/steps;
-    for(let i=0;i<steps;i++){
-      arrow.py=arrow.y;
-      arrow.vy+=G*h; arrow.vx+=wind*h;
-      arrow.x+=arrow.vx*h; arrow.y+=arrow.vy*h;
-      arrow.ang=Math.atan2(arrow.vy,arrow.vx);
-      // 항아리 입구 통과 판정(하강 중 rim 높이를 가로지르며 입구 x범위)
-      if(arrow.vy>0 && arrow.py<=pot.rimY && arrow.y>=pot.rimY){
-        const dx=arrow.x-pot.x, half=pot.mouth/2;
-        if(Math.abs(dx)<=half){ const perfect=Math.abs(dx)<=half*0.4; finishIn(perfect); return; }
-        else if(Math.abs(dx)<=half+pot.w*0.5){ // 항아리 몸통/어깨에 맞고 튕김 = 아슬
-          sfx.clink(); arrow.vx*=-0.3; arrow.vy*=-0.35; arrow.bounced=(arrow.bounced||0)+1;
-          if(arrow.bounced>=2){ finishMiss(true, dx<0?'왼쪽 턱':'오른쪽 턱'); return; }
-        }
-      }
-      if((arrow.y>=groundY()&&arrow.vy>0) || arrow.x>W+40 || arrow.x<-40){
-        const dx=arrow.x-pot.x; const near=Math.abs(dx)<pot.mouth*1.4;
-        finishMiss(near, arrow.x<pot.x?'짧았어요':'넘어갔어요'); return;
-      }
-    }
-    trail.push({x:arrow.x,y:arrow.y}); if(trail.length>22)trail.shift();
-  }
-  else if(state==='result'){ resultT+=dt; }
+  gt+=dt;
+  if(shake>0)shake=Math.max(0,shake-dt*40);
+  if(flash>0)flash=Math.max(0,flash-dt*2.2);
+  for(const p of parts){ p.x+=p.vx*dt*60; p.y+=p.vy*dt*60; p.vy+=13.2*dt; p.life-=dt; }
+  parts=parts.filter(p=>p.life>0);
+  pumpToast(dt);
+
+  // 흔들 항아리 (조준 중에도, 비행 중에도 움직인다)
+  if(mod.sway && state!=='clear') pot.x = pot.baseX + Math.sin(gt*SWAY_W)*swayAmp();
+
+  if(state==='aim'){ angle+=aDir*dt*Math.max(22,(AMAX-aLo)*1.5); if(angle>=AMAX){angle=AMAX;aDir=-1;} else if(angle<=aLo){angle=aLo;aDir=1;} }
+  else if(state==='power'){ power+=pDir*dt*powerSpeed(); if(power>=1){power=1;pDir=-1;} else if(power<=0){power=0;pDir=1;} }
+  else if(state==='fly') flyStep(dt);
+  else if(state==='result'){ resultT+=dt; if(resultT>(lastResult==='in'?1.05:0.95)) afterResult(); }
+  else if(state==='clear'){ clearT+=dt; if(clearT>1.5) nextStage(); }
 }
 
-// ---- predicted aim arc (바람 제외; 바람은 스킬 변수) ----
-function predict(){
-  const a=angle*Math.PI/180, sp=VMAX*power;
-  let x=originX(), y=originY(), vx=Math.cos(a)*sp, vy=-Math.sin(a)*sp, pts=[];
-  for(let i=0;i<60;i++){ vy+=G*(1/60); x+=vx*(1/60); y+=vy*(1/60); if(y>groundY()||x>W)break; if(i%2===0)pts.push({x,y}); }
-  return pts;
+function flyStep(dt){
+  const steps=6, h=dt/steps, g=gravity();
+  for(let i=0;i<steps;i++){
+    const a=arrow;
+    a.px=a.x; a.py=a.y;
+    a.vy+=g*h; a.vx+=wind*h; a.x+=a.vx*h; a.y+=a.vy*h;
+    a.ang=Math.atan2(a.vy,a.vx);
+
+    // 1) 입구면(rim) 통과 — 교차점을 보간해 정확히 판정
+    if(!a.noPot && a.vy>0 && a.py<=pot.rimY && a.y>=pot.rimY){
+      const t=(pot.rimY-a.py)/Math.max(1e-6,(a.y-a.py));
+      const cx=a.px+(a.x-a.px)*t;
+      const tanPhi=Math.max(0.22, a.vy/Math.max(1e-6,Math.abs(a.vx)));
+      const r=judge(cx,tanPhi);
+      if(r){
+        if(r.z==='rim'){
+          sfx.clink(); a.vx*=-0.32; a.vy*=-0.34; a.noPot=true;
+          finishMiss(tanPhi<0.65?'flat':'rim', cx); return;
+        }
+        finishIn(r.z,cx,tanPhi); return;
+      }
+    }
+    // 2) 항아리 몸통 충돌
+    if(!a.noPot && a.y>pot.rimY && Math.abs(a.x-pot.x)<=bodyHalf(a.y)){
+      sfx.clink(); sfx.thud();
+      // 입구 바로 아래 + 거의 수평 진입 = 턱을 넘지 못한 '평사'
+      const flat = (a.y-pot.rimY)<pot.mouth*0.6 && (a.vy/Math.max(1,Math.abs(a.vx)))<0.6;
+      a.vx=-Math.abs(a.vx)*0.3; a.vy*=-0.25; a.noPot=true; a.hitBody=true;
+      finishMiss(flat?'flat':'body', a.x); return;
+    }
+    // 3) 땅 / 화면 밖
+    if(a.y>=groundY()&&a.vy>0){
+      a.landed=true;
+      ground.push({x:clamp(a.x,4,W-4), ang:a.ang});
+      for(let k=0;k<12;k++){ const sp=1+Math.random()*3;
+        parts.push({x:a.x,y:groundY(),vx:(Math.random()-0.5)*sp*2,vy:-Math.random()*sp,life:0.55,r:1.5+Math.random()*2.5,c:'#9b7a4e'}); }
+      sfx.thud();
+      finishMiss(a.x<pot.x-pot.w*0.5?'short':'long', a.x); return;
+    }
+    if(a.x>W+40){ finishMiss('out',null); return; }
+  }
+  trail.push({x:arrow.x,y:arrow.y}); if(trail.length>26)trail.shift();
+
+  // 한 끗 슬로우모션: 하강 중 입구 근처에 아슬하게 접근할 때
+  const dy=pot.rimY-arrow.y, dx=Math.abs(arrow.x-pot.x);
+  if(arrow.vy>0 && dy>0 && dy<H*0.11 && dx<pot.w*1.1){ if(slowT<=0) sfx.slow(); slowT=0.12; }
 }
 
 // ---- render ----
 function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function potGrad(x,w){
+  const g=ctx.createLinearGradient(x-w/2,0,x+w/2,0);
+  if(mod.gold){ g.addColorStop(0,'#8a6412'); g.addColorStop(.45,'#f4cf5e'); g.addColorStop(.75,'#c79a27'); g.addColorStop(1,'#6f4f0d'); }
+  else { g.addColorStop(0,'#6b4a2a'); g.addColorStop(.5,'#9c6c3c'); g.addColorStop(1,'#5a3e22'); }
+  return g;
+}
+function drawEar(ex,ry,ew){
+  const eh=ew*1.6;
+  ctx.fillStyle=potGrad(ex,ew*1.2);
+  rr(ex-ew/2-2, ry, ew+4, eh, ew*0.35); ctx.fill();
+  ctx.fillStyle='#241607'; ctx.beginPath(); ctx.ellipse(ex,ry,ew/2,ew*0.24,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=mod.gold?'#f7e08a':'#3a2410'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(ex,ry,ew/2,ew*0.24,0,0,Math.PI*2); ctx.stroke();
+}
 function drawPot(){
   const x=pot.x, ry=pot.rimY, w=pot.w, h=pot.h, m=pot.mouth;
-  // 몸통(항아리)
   ctx.save();
-  const g=ctx.createLinearGradient(x-w/2,0,x+w/2,0); g.addColorStop(0,'#6b4a2a'); g.addColorStop(.5,'#9c6c3c'); g.addColorStop(1,'#5a3e22');
-  ctx.fillStyle=g; ctx.beginPath();
+  // 그림자
+  ctx.fillStyle='rgba(0,0,0,.26)'; ctx.beginPath(); ctx.ellipse(x,groundY()+3,w*0.42,7,0,0,Math.PI*2); ctx.fill();
+  // 귀(耳) — 몸통 뒤쪽에 먼저
+  drawEar(x-pot.earOff,ry,pot.earW); drawEar(x+pot.earOff,ry,pot.earW);
+  // 몸통
+  ctx.fillStyle=potGrad(x,w); ctx.beginPath();
   ctx.moveTo(x-m/2,ry);
   ctx.bezierCurveTo(x-w/2,ry+h*0.22, x-w/2,ry+h*0.72, x-w*0.30,ry+h);
   ctx.lineTo(x+w*0.30,ry+h);
@@ -187,25 +543,46 @@ function drawPot(){
   ctx.closePath(); ctx.fill();
   // 입구(어두운 구멍)
   ctx.fillStyle='#241607'; ctx.beginPath(); ctx.ellipse(x,ry,m/2,m*0.18,0,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='#3a2410'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(x,ry,m/2,m*0.18,0,0,Math.PI*2); ctx.stroke();
-  // 입구 양 턱 하이라이트(겨냥 포인트)
-  ctx.fillStyle='rgba(255,220,120,.9)'; ctx.fillRect(x-m/2-1,ry-3,3,6); ctx.fillRect(x+m/2-2,ry-3,3,6);
+  ctx.strokeStyle=mod.gold?'#f7e08a':'#3a2410'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(x,ry,m/2,m*0.18,0,0,Math.PI*2); ctx.stroke();
+  // 유효 입구 표시(조준 단계) — 진입각이 얕으면 좁아지는 걸 눈으로 보여줌
+  if(state==='aim'||state==='power'){
+    const win=mouthWindow(Math.max(0.22, entryTan(angle)||1.2));
+    ctx.fillStyle='rgba(120,255,160,.85)'; ctx.fillRect(x-win/2,ry-4,win,2.5);
+    ctx.fillStyle='rgba(255,220,120,.9)'; ctx.fillRect(x-m/2-1,ry-4,2.5,7); ctx.fillRect(x+m/2-1.5,ry-4,2.5,7);
+  }
   // 몸통 띠 장식
   ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x-w*0.42,ry+h*0.5); ctx.lineTo(x+w*0.42,ry+h*0.5); ctx.stroke();
   ctx.restore();
 }
+function drawStuckArrows(){
+  for(const s of stuck){
+    const bx=pot.x+s.ox, by=pot.rimY+(s.z==='ear'?2:4);
+    ctx.save(); ctx.translate(bx,by); ctx.rotate(Math.PI/2+s.tilt);
+    ctx.strokeStyle='#caa15a'; ctx.lineWidth=3.4; ctx.beginPath(); ctx.moveTo(-30,0); ctx.lineTo(2,0); ctx.stroke();
+    ctx.fillStyle=s.z==='gwan'?'#ffe14d':'#e9edf2'; ctx.beginPath();
+    ctx.moveTo(-30,0); ctx.lineTo(-22,-6); ctx.lineTo(-18,0); ctx.lineTo(-22,6); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+function drawGroundArrows(){
+  for(const a of ground){
+    ctx.save(); ctx.globalAlpha=0.75; ctx.translate(a.x,groundY()); ctx.rotate(clamp(a.ang,0.5,1.35));
+    ctx.strokeStyle='#8a7048'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-26,0); ctx.lineTo(4,0); ctx.stroke();
+    ctx.fillStyle='#cfd6de'; ctx.beginPath(); ctx.moveTo(-26,0); ctx.lineTo(-19,-5); ctx.lineTo(-15,0); ctx.lineTo(-19,5); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
 function drawWindFlag(){
-  const px=Math.min(W-26, pot.x+pot.w*0.62), gy=groundY(), topY=gy-pot.h-54;
+  const px=clamp(pot.baseX+pot.w*0.72, 26, W-26), gy=groundY(), topY=gy-pot.h-58;
   ctx.save();
   ctx.strokeStyle='#6a4e2a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(px,gy); ctx.lineTo(px,topY); ctx.stroke();
   ctx.fillStyle='#caa15a'; ctx.beginPath(); ctx.arc(px,topY,4,0,Math.PI*2); ctx.fill();
-  // 깃발: 바람 방향·세기로 펄럭
   const dir = wind>1?1 : wind<-1?-1 : 0;
-  const strength = Math.min(1, Math.abs(wind)/160);
-  const len = 30 + strength*20, wave=Math.sin(gt*8)*3*(strength+0.2);
+  const strength = Math.min(1, Math.abs(wind)/200);
+  const len = 28 + strength*26, wave=Math.sin(gt*(6+strength*8))*3*(strength+0.2);
   ctx.fillStyle = dir===0 ? '#9aa6b0' : (dir>0?'#ff8a5c':'#5cb8ff');
   ctx.beginPath(); ctx.moveTo(px,topY+2);
-  if(dir===0){ ctx.lineTo(px+6,topY+22); ctx.lineTo(px-2,topY+20); } // 무풍=축 처짐
+  if(dir===0){ ctx.lineTo(px+6,topY+22); ctx.lineTo(px-2,topY+20); }
   else { const L=px+dir*len; ctx.quadraticCurveTo(px+dir*len*0.5,topY-6+wave,L,topY+2); ctx.quadraticCurveTo(px+dir*len*0.5,topY+14+wave,px,topY+16); }
   ctx.closePath(); ctx.fill();
   ctx.restore();
@@ -213,85 +590,203 @@ function drawWindFlag(){
 function drawArrowShape(x,y,ang,sc){
   ctx.save(); ctx.translate(x,y); ctx.rotate(ang); sc=sc||1;
   ctx.strokeStyle='#caa15a'; ctx.lineWidth=4*sc; ctx.beginPath(); ctx.moveTo(-26*sc,0); ctx.lineTo(16*sc,0); ctx.stroke();
-  ctx.fillStyle='#e8534e'; ctx.beginPath(); ctx.moveTo(16*sc,0); ctx.lineTo(8*sc,-5*sc); ctx.lineTo(8*sc,5*sc); ctx.closePath(); ctx.fill(); // 촉
-  ctx.fillStyle='#e9edf2'; ctx.beginPath(); ctx.moveTo(-26*sc,0); ctx.lineTo(-18*sc,-6*sc); ctx.lineTo(-14*sc,0); ctx.lineTo(-18*sc,6*sc); ctx.closePath(); ctx.fill(); // 깃
+  ctx.fillStyle='#e8534e'; ctx.beginPath(); ctx.moveTo(16*sc,0); ctx.lineTo(8*sc,-5*sc); ctx.lineTo(8*sc,5*sc); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#e9edf2'; ctx.beginPath(); ctx.moveTo(-26*sc,0); ctx.lineTo(-18*sc,-6*sc); ctx.lineTo(-14*sc,0); ctx.lineTo(-18*sc,6*sc); ctx.closePath(); ctx.fill();
   ctx.restore();
 }
+
+function drawAimGuides(){
+  const th=angle*Math.PI/180;
+  // ① 이상 궤적(목표 점선) — 현재 각도로 항아리에 '정확히' 닿는 궤적
+  const ip=idealPower();
+  if(ip!=null){
+    const pts=simArc(th,speedOf(ip),1,false);
+    ctx.setLineDash([5,6]); ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=2;
+    ctx.beginPath(); pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke(); ctx.setLineDash([]);
+    // 진입각 배지
+    if(pts.length>2){
+      const p1=pts[pts.length-2],p2=pts[pts.length-1];
+      const phi=Math.atan2(p2.y-p1.y,Math.abs(p2.x-p1.x))*180/Math.PI;
+      const safe=phi>=45, t=Math.round(phi)+'° '+(safe?'안정':'얕음');
+      ctx.fillStyle=safe?'#aef5b0':'#ffb14d'; ctx.font='bold 12px system-ui'; ctx.textAlign='center';
+      ctx.fillText('진입 '+t, pot.x, pot.rimY-pot.earW*0.9-16);
+    }
+    // 흔들 항아리: 화살이 도착할 때의 입구 위치(선행 지점)
+    if(mod.sway){
+      const tx=targetX();
+      ctx.strokeStyle='rgba(180,255,200,.9)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(tx-6,pot.rimY-16); ctx.lineTo(tx,pot.rimY-8); ctx.lineTo(tx+6,pot.rimY-16); ctx.stroke();
+      ctx.fillStyle='rgba(180,255,200,.9)'; ctx.font='bold 10px system-ui'; ctx.textAlign='center';
+      ctx.fillText('도착 시 위치', tx, pot.rimY-20);
+    }
+  } else {
+    ctx.fillStyle='#ff9a9a'; ctx.font='bold 13px system-ui'; ctx.textAlign='center';
+    ctx.fillText('이 각도로는 사거리 밖', pot.x, pot.rimY-26);
+  }
+  // ② 현재 파워 궤적(일부만) — 점선에 겹쳐 맞추는 게 플레이
+  if(state==='power'){
+    const pts=simArc(th,speedOf(power),previewFrac(),false);
+    ctx.fillStyle='rgba(255,235,150,.95)';
+    for(const p of pts){ ctx.beginPath(); ctx.arc(p.x,p.y,2.6,0,Math.PI*2); ctx.fill(); }
+    const last=pts[pts.length-1];
+    if(last&&last.end){ ctx.strokeStyle='rgba(255,235,150,.8)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(last.x-7,groundY()-7); ctx.lineTo(last.x+7,groundY()+7);
+      ctx.moveTo(last.x+7,groundY()-7); ctx.lineTo(last.x-7,groundY()+7); ctx.stroke(); }
+  }
+  // ③ 직전 발의 입구면 통과 지점 (바람 보정 단서)
+  if(lastCross && !lastCross.ok){
+    ctx.strokeStyle='rgba(255,140,140,.75)'; ctx.lineWidth=2; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(lastCross.x,pot.rimY-30); ctx.lineTo(lastCross.x,pot.rimY+4); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,140,140,.9)'; ctx.font='bold 10px system-ui'; ctx.textAlign='center';
+    ctx.fillText('직전 발', lastCross.x, pot.rimY-34);
+  }
+  // ④ 조준 화살 + 각도 호
+  ctx.save(); ctx.globalAlpha=0.95; drawArrowShape(originX(),originY(),-th,1.1); ctx.restore();
+  ctx.strokeStyle='rgba(255,220,120,.6)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(originX(),originY(),40,-th,0); ctx.stroke();
+  ctx.fillStyle='#ffe6b0'; ctx.font='bold 13px system-ui'; ctx.textAlign='left'; ctx.fillText(Math.round(angle)+'°',originX()+46,originY()-6);
+}
+
 function render(){
   ctx.clearRect(0,0,W,H);
   const gy=groundY();
-  // 하늘 (석양 그라데이션)
-  const sky=ctx.createLinearGradient(0,0,0,gy); sky.addColorStop(0,'#24405e'); sky.addColorStop(0.55,'#4a6a7e'); sky.addColorStop(1,'#caa36e');
+  // 하늘
+  const sky=ctx.createLinearGradient(0,0,0,gy);
+  if(mod.night){ sky.addColorStop(0,'#0b1430'); sky.addColorStop(0.6,'#1b2a44'); sky.addColorStop(1,'#3b3350'); }
+  else { sky.addColorStop(0,'#24405e'); sky.addColorStop(0.55,'#4a6a7e'); sky.addColorStop(1,'#caa36e'); }
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,gy);
-  // 해 (은은한 글로우)
-  ctx.save(); const sx=W*0.78, syy=gy*0.30;
-  const sg=ctx.createRadialGradient(sx,syy,4,sx,syy,70); sg.addColorStop(0,'rgba(255,238,200,.9)'); sg.addColorStop(1,'rgba(255,238,200,0)');
+  // 해 / 달
+  ctx.save(); const sx=W*0.78, syy=gy*0.28, R=mod.night?20:26;
+  const sg=ctx.createRadialGradient(sx,syy,4,sx,syy,70);
+  sg.addColorStop(0,mod.night?'rgba(220,235,255,.75)':'rgba(255,238,200,.9)'); sg.addColorStop(1,'rgba(255,238,200,0)');
   ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sx,syy,70,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#ffe9b8'; ctx.beginPath(); ctx.arc(sx,syy,26,0,Math.PI*2); ctx.fill(); ctx.restore();
-  // 원경 산 (겹겹)
+  ctx.fillStyle=mod.night?'#e7f0ff':'#ffe9b8'; ctx.beginPath(); ctx.arc(sx,syy,R,0,Math.PI*2); ctx.fill();
+  if(mod.night){ ctx.fillStyle=sky; ctx.beginPath(); ctx.arc(sx+10,syy-6,R*0.85,0,Math.PI*2); ctx.fill(); }
+  ctx.restore();
+  // 별 (밤)
+  if(mod.night){ ctx.fillStyle='rgba(255,255,255,.7)';
+    for(let i=0;i<26;i++){ const bx=(i*149)%W, by=(i*83)%(gy*0.6); const tw=0.5+0.5*Math.sin(gt*2+i); ctx.globalAlpha=tw*0.8; ctx.fillRect(bx,by,2,2);} ctx.globalAlpha=1; }
+  // 원경 산
   function hill(baseY,amp,col){ ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(0,baseY);
     for(let x=0;x<=W;x+=W/6){ ctx.lineTo(x,baseY-Math.sin(x/W*Math.PI*1.4+baseY)*amp); } ctx.lineTo(W,gy); ctx.closePath(); ctx.fill(); }
-  hill(gy-54,34,'rgba(60,78,96,.6)'); hill(gy-24,26,'rgba(74,90,78,.7)');
-  // 구름
-  ctx.fillStyle='rgba(255,255,255,.14)';
-  for(let i=0;i<3;i++){ const cx=((i*160+gt*6)%(W+160))-80, cyy=gy*0.22+i*26; ctx.beginPath(); ctx.ellipse(cx,cyy,36,12,0,0,Math.PI*2); ctx.ellipse(cx+28,cyy+4,26,10,0,0,Math.PI*2); ctx.fill(); }
+  hill(gy-54,34,mod.night?'rgba(24,32,52,.75)':'rgba(60,78,96,.6)');
+  hill(gy-24,26,mod.night?'rgba(20,30,34,.85)':'rgba(74,90,78,.7)');
+  // 구름 (바람 방향으로 흐른다)
+  ctx.fillStyle=mod.night?'rgba(200,215,255,.08)':'rgba(255,255,255,.14)';
+  const cdrift = gt*(6+wind*0.05);
+  for(let i=0;i<3;i++){ const cx=((i*160+cdrift)%(W+200)+W+200)%(W+200)-100, cyy=gy*0.22+i*26;
+    ctx.beginPath(); ctx.ellipse(cx,cyy,36,12,0,0,Math.PI*2); ctx.ellipse(cx+28,cyy+4,26,10,0,0,Math.PI*2); ctx.fill(); }
+  // 바람 먼지
+  if(Math.abs(wind)>1){ ctx.fillStyle=mod.night?'rgba(200,215,255,.22)':'rgba(255,245,210,.3)';
+    for(let i=0;i<10;i++){ const t=(gt*(wind*0.004)+i*0.37), dx=((t%1)+1)%1;
+      const xx=wind>0? dx*W : W-dx*W, yy=gy*0.55+((i*67)%Math.max(1,gy*0.4));
+      ctx.fillRect(xx,yy,6,1.5); } }
 
   ctx.save();
   if(shake>0) ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
-  // 바닥(마당 흙)
-  const gg=ctx.createLinearGradient(0,gy,0,H); gg.addColorStop(0,'#7a5832'); gg.addColorStop(1,'#43301c');
+  // 바닥
+  const gg=ctx.createLinearGradient(0,gy,0,H);
+  if(mod.night){ gg.addColorStop(0,'#3a2f22'); gg.addColorStop(1,'#1d160f'); }
+  else { gg.addColorStop(0,'#7a5832'); gg.addColorStop(1,'#43301c'); }
   ctx.fillStyle=gg; ctx.fillRect(0,gy,W,H-gy);
-  // 지평선 라인 + 흙 질감
   ctx.strokeStyle='rgba(255,230,180,.18)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke();
-  ctx.fillStyle='rgba(0,0,0,.08)'; for(let i=0;i<34;i++){ const x=(i*83%W), yy=gy+8+(i*47%(H-gy-10)); ctx.fillRect(x,yy,3,2); }
-  // 거리 가이드 (사대 → 항아리 바닥, 점선)
+  ctx.fillStyle='rgba(0,0,0,.08)'; for(let i=0;i<34;i++){ const x=(i*83%W), yy=gy+8+(i*47%Math.max(1,H-gy-10)); ctx.fillRect(x,yy,3,2); }
+  // 거리 가이드
   ctx.strokeStyle='rgba(255,255,255,.14)'; ctx.lineWidth=2; ctx.setLineDash([7,9]);
   ctx.beginPath(); ctx.moveTo(originX(),gy+16); ctx.lineTo(pot.x,gy+16); ctx.stroke(); ctx.setLineDash([]);
-  // 사대(발사대 멍석)
+  // 사대(멍석)
   ctx.save(); const mx=originX(); ctx.fillStyle='#8a6b3c'; rr(mx-34,gy-6,68,14,6); ctx.fill();
   ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for(let i=-28;i<=28;i+=8){ ctx.beginPath(); ctx.moveTo(mx+i,gy-6); ctx.lineTo(mx+i,gy+8); ctx.stroke(); } ctx.restore();
 
+  drawGroundArrows();
   drawPot();
+  drawStuckArrows();
   drawWindFlag();
 
-  // 예측 조준선 (power 상태) — 바람 미반영
-  if(state==='power'){ const pts=predict(); ctx.fillStyle='rgba(255,255,255,.5)';
-    for(const p of pts){ ctx.beginPath(); ctx.arc(p.x,p.y,2.4,0,Math.PI*2); ctx.fill(); } }
+  if(state==='aim'||state==='power') drawAimGuides();
 
-  // 조준 화살표(각도) - aim/power
-  if(state==='aim'||state==='power'){ const a=angle*Math.PI/180;
-    ctx.save(); ctx.globalAlpha=0.9; drawArrowShape(originX(),originY(),-a,1.1); ctx.restore();
-    // 각도 호
-    ctx.strokeStyle='rgba(255,220,120,.6)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(originX(),originY(),40,-a,0); ctx.stroke();
-    ctx.fillStyle='#ffe6b0'; ctx.font='bold 13px system-ui'; ctx.textAlign='left'; ctx.fillText(Math.round(angle)+'°',originX()+46,originY()-6);
-  }
   // 궤적
   if(trail.length){ ctx.strokeStyle='rgba(255,230,150,.5)'; ctx.lineWidth=3; ctx.beginPath(); trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke(); }
-  // 날아가는 화살
-  if(arrow&&!arrow.dead && (state==='fly')) drawArrowShape(arrow.x,arrow.y,arrow.ang,1);
-  // 성공 후 항아리에 꽂힌 화살
-  if(state==='result' && arrow){ drawArrowShape(pot.x,pot.rimY+6,Math.PI/2,0.9); }
+  // 비행 중 + 빗나간 직후(튕긴 자리에 멈춰 보여줌)
+  if(arrow && (state==='fly' || (state==='result' && lastResult==='miss' && !arrow.landed))) drawArrowShape(arrow.x,arrow.y,arrow.ang,1);
 
   // 파티클
-  for(const p of parts){ ctx.globalAlpha=Math.max(0,p.life*1.4); ctx.fillStyle=p.c||'#ffcf5c'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
+  for(const p of parts){ ctx.globalAlpha=Math.max(0,Math.min(1,p.life*1.4)); ctx.fillStyle=p.c||'#ffcf5c'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
   ctx.globalAlpha=1;
   ctx.restore();
 
-  // 파워 게이지 (power 상태)
-  if(state==='power'){ const bw=Math.min(W*0.8,340),bx=(W-bw)/2,by=H*0.9,bh=20;
+  // 밤 비네트
+  if(mod.night){
+    const vg=ctx.createRadialGradient(pot.x,pot.rimY,20,pot.x,pot.rimY,Math.max(W,H)*0.7);
+    vg.addColorStop(0,'rgba(6,10,24,0)'); vg.addColorStop(1,'rgba(6,10,24,.55)');
+    ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  }
+  // 슬로우모션 연출
+  if(slowT>0){
+    ctx.fillStyle='rgba(255,240,180,.06)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,225,77,.9)'; ctx.font='bold 13px system-ui'; ctx.textAlign='center';
+    ctx.fillText('…한 끗…', W/2, H*0.30);
+  }
+  // 파워 게이지
+  if(state==='power'){
+    const bw=Math.min(W*0.82,340),bx=(W-bw)/2,by=H-62-bottomRes(),bh=20;
     ctx.fillStyle='rgba(0,0,0,.45)'; rr(bx-4,by-4,bw+8,bh+8,10); ctx.fill();
     ctx.save(); rr(bx,by,bw,bh,8); ctx.clip();
     const g=ctx.createLinearGradient(bx,0,bx+bw,0); g.addColorStop(0,'#3a7a3a'); g.addColorStop(.6,'#e8c24e'); g.addColorStop(1,'#e8534e');
     ctx.fillStyle=g; ctx.fillRect(bx,by,bw*power,bh); ctx.restore();
+    // 목표 파워 눈금
+    const ip=idealPower();
+    if(ip!=null){ const tx=bx+bw*ip;
+      ctx.fillStyle='#fff'; ctx.fillRect(tx-1.5,by-7,3,bh+14);
+      ctx.fillStyle='#fff'; ctx.font='bold 10px system-ui'; ctx.textAlign='center'; ctx.fillText('목표',tx,by-10); }
     ctx.fillStyle='#fff'; ctx.font='bold 11px system-ui'; ctx.textAlign='center'; ctx.fillText('힘 '+Math.round(power*100)+'%',W/2,by+bh+14);
   }
+  // 플래시
+  if(flash>0){ ctx.fillStyle='rgba(255,245,200,'+(flash*0.45)+')'; ctx.fillRect(0,0,W,H); }
+  // 일시정지
+  if(paused){ ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#ffe6b0'; ctx.font='bold 30px system-ui'; ctx.textAlign='center'; ctx.fillText('⏸ 일시정지',W/2,H*0.46);
+    ctx.font='14px system-ui'; ctx.fillStyle='#caa15a'; ctx.fillText('▶ 버튼을 눌러 계속',W/2,H*0.46+30);
+    const got=ACH.filter(a=>meta.ach[a.id]).length;
+    ctx.fillText('업적 '+got+'/'+ACH.length+' · 최고 '+meta.bestStage+'단계 · 누적 '+meta.totalIn+'발 적중',W/2,H*0.46+58); }
 }
 
-function loop(ts){ requestAnimationFrame(loop); if(state==='start'){lastTs=ts;return;} let dt=(ts-lastTs)/1000; lastTs=ts; if(dt>0.05)dt=0.05; if(dt<0)dt=0; update(dt); render(); }
+// ---- loop ----
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(state==='start'){ lastTs=ts; return; }
+  if(state==='over'||paused){ lastTs=ts; render(); return; }
+  let dt=(ts-lastTs)/1000; lastTs=ts; if(dt>0.05)dt=0.05; if(dt<0)dt=0;
+  if(slowT>0){ slowT-=dt; dt*=0.34; }
+  update(dt); render();
+}
 requestAnimationFrame(loop);
 
+// ---- input ----
 cv.addEventListener('pointerdown',e=>{ e.preventDefault(); tap(); });
-$('startBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); initAudio(); score=0; combo=0; stage=1; $('start').classList.add('hidden'); setTop(); newThrow(); lastTs=performance.now(); });
-setTop();
+addEventListener('keydown',e=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); if(state==='start')startGame(); else tap(); } });
+function tryLockPortrait(){ try{ if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('portrait').catch(()=>{}); }catch(e){} }
+function startGame(){
+  initAudio(); tryLockPortrait();
+  score=0; combo=0; stage=1; paused=false; continuedThisRun=false;
+  parts=[]; toastQ=[]; $('pauseBtn').textContent='⏸';
+  $('start').classList.add('hidden'); $('over').classList.add('hidden');
+  setupStage(); newArrow(); setTop(); lastTs=performance.now();
+}
+$('startBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); startGame(); });
+$('overBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); if(interCount%3===0) showInterstitial(); startGame(); });
+$('continueBtn').addEventListener('pointerdown',async e=>{
+  e.preventDefault(); e.stopPropagation();
+  const b=$('continueBtn'); b.style.pointerEvents='none'; b.textContent='⏳ 광고 보는 중…';
+  const ok=await showRewarded();
+  b.style.pointerEvents='auto'; b.textContent='📺 광고 보고 이어하기 (화살 +3)';
+  if(ok){ continuedThisRun=true; arrowsLeft=3; $('over').classList.add('hidden'); newArrow(); setTop(); lastTs=performance.now(); }
+});
+$('pauseBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); if(state==='start'||state==='over')return; paused=!paused; $('pauseBtn').textContent=paused?'▶':'⏸'; if(!paused)lastTs=performance.now(); });
+$('muteBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); muted=!muted; $('muteBtn').textContent=muted?'🔇':'🔊'; });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && state!=='start' && state!=='over'){ paused=true; $('pauseBtn').textContent='▶'; } });
+
+// 시작 화면 기록
+$('startRec').textContent='최고 '+best+'점 · 최고 '+meta.bestStage+'단계 · 업적 '+ACH.filter(a=>meta.ach[a.id]).length+'/'+ACH.length;
+setupStage(); setTop(); render();
 </script>
 </body></html>
