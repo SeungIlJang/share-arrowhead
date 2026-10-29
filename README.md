@@ -51,6 +51,13 @@ DOM·캔버스를 스텁해 게임 스크립트를 그대로 구동하는 헤드
 node tools/harness.js index.html
 ```
 
+항아리 아트는 **게임 적중 판정 좌표와 직결**되므로 별도 검증기가 있습니다.
+투명 PNG를 픽셀 실측해 귀 구멍 폭·오프셋·외곽·림 높이가 규격 안에 드는지 확인합니다.
+
+```bash
+node tools/check-pot-art.mjs <항아리.png>
+```
+
 ## 문서
 
 - [DESIGN.md](DESIGN.md) — 설계 분석, v0.2 문제 진단, v0.3 리디자인 근거, 난이도 실측, 로드맵
@@ -62,9 +69,10 @@ node tools/harness.js index.html
 | [design/DESIGN-BRIEF.md](design/DESIGN-BRIEF.md) | **발주서** — 톤앤매너, 팔레트, 에셋 목록, 납품 규격, 검수 체크리스트 |
 | [design/pot-spec.svg](design/pot-spec.svg) | **항아리 치수 도면** — 입구·귀 비율은 적중 판정 좌표이므로 준수 필수 |
 | [design/screen-layout.svg](design/screen-layout.svg) | 화면 구성·세이프에어리어·**실제 렌더 크기** |
-| [design/ART-PROMPTS.md](design/ART-PROMPTS.md) | AI 이미지 생성용 영문 프롬프트 (시안 탐색용) |
+| [design/ART-PROMPTS.md](design/ART-PROMPTS.md) | **Codex 아트 작업 지시서** — 에셋별 프롬프트·수락 기준·납품 규격 |
 
-> `design/` 폴더를 그대로 전달하면 됩니다. 디자이너는 발주서 → 도면 순으로 읽습니다.
+> 사람 디자이너에게는 `design/` 폴더를 그대로 전달합니다 (발주서 → 도면 순).
+> 이미지 생성은 Codex가 맡고, 치수 검증·합성·게임 적용은 Claude가 맡습니다.
 
 ## 상태
 
