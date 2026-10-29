@@ -39,7 +39,8 @@
 - 순수 HTML5 Canvas + WebAudio, **외부 의존성 없음** (단일 파일 `index.html`)
 - 세로 모바일 전용 (가로 전환 시 안내 화면)
 - 업적 8종 / 기록은 `localStorage`
-- AdMob 훅 내장 (Capacitor 네이티브에서만 동작, 현재 **테스트 광고 단위**)
+- AdMob 연동 (Capacitor 네이티브에서만 동작). **실 광고 단위 적용됨** —
+  개발 중에는 `AD_USE_TEST = true` 로 되돌려 테스트 단위를 쓸 것 (실광고 클릭 시 계정 정지 위험)
 - OTA 라이브: https://seungiljang.github.io/games/tuho.html
 
 ## 검증
@@ -77,4 +78,4 @@ node tools/check-pot-art.mjs <항아리.png>
 ## 상태
 
 **v0.3** — 게임성 리디자인 완료 (3구역 과녁 · 5발 단계제 · 판정 정밀화 · 변주 · 업적).
-다음: 일일 도전, 결과 공유 카드, 실 광고 단위 교체, 도감·강화.
+다음: 일일 도전, 결과 공유 카드, 아트 에셋 적용, 도감·강화.
