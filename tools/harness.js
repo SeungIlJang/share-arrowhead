@@ -43,7 +43,7 @@ const sandbox={
 sandbox.window=sandbox;
 const vm=require('vm');
 const ctxv=vm.createContext(sandbox);
-vm.runInContext(code+'\n;globalThis.__api={get state(){return state},set state(v){state=v},'+
+vm.runInContext(code+'\n;globalThis.__api={get state(){return state},set state(v){state=v},set score(v){score=v},gameOver,'+
   'get stage(){return stage},set stage(v){stage=v},get angle(){return angle},set angle(v){angle=v},'+
   'get power(){return power},set power(v){power=v},get score(){return score},get combo(){return combo},'+
   'get arrowsLeft(){return arrowsLeft},set arrowsLeft(v){arrowsLeft=v},get inCount(){return inCount},get quota(){return quota},'+
@@ -51,7 +51,9 @@ vm.runInContext(code+'\n;globalThis.__api={get state(){return state},set state(v
   'get stuck(){return stuck},get ground(){return ground},get best(){return best},get meta(){return meta},'+
   'setupStage,newArrow,launch,update,render,idealPower,solveSpeed,simArc,judge,mouthWindow,earWindow,bodyHalf,'+
   'get aLo(){return aLo},get vLo(){return vLo},get vHi(){return vHi},'+
-  'speedOf,gravity,groundY,originX,originY,startGame,AMAX,ZONE,resize,layoutStage,calibrate,entryTan,afterResult};',
+  'get mode(){return mode},set mode(v){mode=v},get daily(){return daily},get rngState(){return rngState},set rngState(v){rngState=v},'+
+  'speedOf,gravity,groundY,originX,originY,startGame,AMAX,ZONE,resize,layoutStage,calibrate,entryTan,afterResult,'+
+  'nextStage,rollDaily,dailyView,seedFrom,todayKey,prevKey,shareText,paintStartScreen};',
   ctxv,{filename:'tuho.js'});
 const A=sandbox.__api;
 
@@ -283,6 +285,75 @@ for(const [w,h] of [[320,568],[360,640],[375,812],[414,896],[430,932],[768,1024]
   ok(bad===null, `${w}x${h}: 25단계까지 정상`, String(bad));
 }
 sandbox.innerWidth=375; sandbox.innerHeight=812; A.resize();
+
+hdr('13. 일일 도전 — 같은 날이면 누구나 같은 판');
+/** 한 판을 처음부터 n단계까지 진행하며 (바람, 변주) 를 기록 */
+function stageSeq(m,n){
+  A.startGame(m);
+  const out=[];
+  for(let i=0;i<n;i++){
+    out.push(Math.round(A.wind*100)/100+'|'+(A.mod.pick?.id||'-')+'|'+(A.mod.pick2?.id||'-'));
+    A.nextStage();
+  }
+  return out;
+}
+const d=A.todayKey();
+const run1=stageSeq('daily',25), run2=stageSeq('daily',25);
+ok(run1.join()===run2.join(),'같은 날 두 번 플레이 → 25단계까지 완전히 동일한 판',
+   run1.slice(0,3).join(' , '));
+ok(new Set(run1).size>15,'단계마다 판이 다르다(시드가 고정값을 뱉지 않음)', new Set(run1).size+'/25');
+
+// 날짜가 바뀌면 다른 판
+A.rngState=A.seedFrom('tuho-2026-01-01'); A.mode='daily';
+const seqA=[]; A.stage=1; for(let i=0;i<12;i++){ A.setupStage(); seqA.push(Math.round(A.wind*100)/100+'|'+(A.mod.pick?.id||'-')); A.stage=i+2; }
+A.rngState=A.seedFrom('tuho-2026-01-02'); A.mode='daily';
+const seqB=[]; A.stage=1; for(let i=0;i<12;i++){ A.setupStage(); seqB.push(Math.round(A.wind*100)/100+'|'+(A.mod.pick?.id||'-')); A.stage=i+2; }
+ok(seqA.join()!==seqB.join(),'다른 날짜 → 다른 판');
+console.log('  1/1: '+seqA.slice(2,5).join(' , '));
+console.log('  1/2: '+seqB.slice(2,5).join(' , '));
+
+// 일반 모드는 매판 달라야 한다
+const e1=stageSeq('endless',14), e2=stageSeq('endless',14);
+ok(e1.join()!==e2.join(),'일반 모드는 매번 다른 판 (시드 고정이 새어나오지 않음)');
+
+hdr('13b. 일일 도전 기록 / 연속일');
+const D=A.daily;
+D.date=''; D.best=0; D.stage=1; D.plays=0; D.streak=0; D.last='';
+A.startGame('daily');
+ok(D.date===d && D.plays===1,'오늘 첫 판 → 오늘 기록이 열리고 시도 1회','date='+D.date+' plays='+D.plays);
+ok(D.streak===1,'연속일 1일차로 시작','streak='+D.streak);
+A.startGame('daily');
+ok(D.plays===2 && D.streak===1,'같은 날 재도전 → 시도만 증가, 연속일 유지','plays='+D.plays+' streak='+D.streak);
+
+// 어제 플레이했으면 연속일 +1
+D.date=A.prevKey(d); D.last=A.prevKey(d); D.streak=4; D.plays=9; D.best=999;
+A.startGame('daily');
+ok(D.streak===5,'어제 플레이 → 연속일 +1','streak='+D.streak);
+ok(D.best===0 && D.plays===1,'날짜가 바뀌면 오늘 기록은 0부터','best='+D.best+' plays='+D.plays);
+
+// 이틀 비우면 연속 끊김
+D.date='2026-01-01'; D.last='2026-01-01'; D.streak=7;
+A.startGame('daily');
+ok(D.streak===1,'이틀 이상 비우면 연속일 초기화','streak='+D.streak);
+
+// 기록은 갱신될 때만 올라간다 + 이어하기는 막혀야 한다
+A.startGame('daily'); A.stage=7; A.score=500; A.gameOver();
+ok(D.best===500 && D.stage===7,'첫 판 점수가 오늘 기록이 된다','best='+D.best+' stage='+D.stage);
+ok(els.continueBtn.style.display==='none','일일 도전에서는 광고 이어하기가 숨겨진다(판이 같아야 비교 가능)');
+ok(els.shareBtn.style.display==='block','일일 도전 결과에 공유 버튼이 뜬다');
+
+A.startGame('daily'); A.stage=3; A.score=200; A.gameOver();
+ok(D.best===500 && D.stage===7,'더 낮은 점수는 기록을 덮지 않는다','best='+D.best+' stage='+D.stage);
+A.startGame('daily'); A.stage=11; A.score=900; A.gameOver();
+ok(D.best===900 && D.stage===11,'더 높은 점수는 기록을 갱신한다','best='+D.best+' stage='+D.stage);
+
+A.startGame('endless'); A.score=50; A.gameOver();
+ok(els.continueBtn.style.display==='block','일반 모드에서는 이어하기가 보인다');
+ok(els.shareBtn.style.display==='none','일반 모드에는 공유 버튼이 없다');
+ok(D.best===900,'일반 모드 점수는 일일 기록을 건드리지 않는다','best='+D.best);
+
+const st=A.shareText();
+ok(st.includes('오늘의 도전')&&st.includes('900')&&st.includes('11단계'),'공유 문구에 날짜·점수·단계가 들어간다','"'+st.replace(/\n/g,' / ')+'"');
 
 hdr('12. 렌더 스모크 — 모든 상태/변주에서 예외 없이 그려지는가');
 let renderErr=null, renders=0;
