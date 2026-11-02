@@ -32,7 +32,12 @@ const sandbox={
   console,
   innerWidth:375, innerHeight:812, devicePixelRatio:2,
   addEventListener:noop, requestAnimationFrame:noop,
-  document:{ getElementById:el, addEventListener:noop, body:{classList:{add:noop,remove:noop}} },
+  // 공유 카드는 오프스크린 캔버스에 그린다 → createElement 로 캔버스 흉내를 내 준다.
+  document:{ getElementById:el, addEventListener:noop,
+    createElement:tag=>({tag,width:0,height:0,style:{},value:'',
+      getContext:makeCtx, toBlob:cb=>cb({size:1,type:'image/png'}),
+      click:noop, select:noop, remove:noop, appendChild:noop, setAttribute:noop}),
+    body:{classList:{add:noop,remove:noop},appendChild:noop,removeChild:noop} },
   localStorage:{ getItem:k=>(k in store?store[k]:null), setItem:(k,v)=>{store[k]=String(v)}, removeItem:k=>{delete store[k]} },
   navigator:{ vibrate:noop },
   performance:{ now:()=>0 },
@@ -53,7 +58,8 @@ vm.runInContext(code+'\n;globalThis.__api={get state(){return state},set state(v
   'get aLo(){return aLo},get vLo(){return vLo},get vHi(){return vHi},'+
   'get mode(){return mode},set mode(v){mode=v},get daily(){return daily},get rngState(){return rngState},set rngState(v){rngState=v},'+
   'speedOf,gravity,groundY,originX,originY,startGame,AMAX,ZONE,resize,layoutStage,calibrate,entryTan,afterResult,'+
-  'nextStage,rollDaily,dailyView,seedFrom,todayKey,prevKey,shareText,paintStartScreen};',
+  'get runStats(){return runStats},'+
+  'nextStage,rollDaily,dailyView,seedFrom,todayKey,prevKey,shareText,paintStartScreen,makeCard,finishIn};',
   ctxv,{filename:'tuho.js'});
 const A=sandbox.__api;
 
@@ -349,11 +355,76 @@ ok(D.best===900 && D.stage===11,'더 높은 점수는 기록을 갱신한다','b
 
 A.startGame('endless'); A.score=50; A.gameOver();
 ok(els.continueBtn.style.display==='block','일반 모드에서는 이어하기가 보인다');
-ok(els.shareBtn.style.display==='none','일반 모드에는 공유 버튼이 없다');
+ok(els.shareBtn.style.display==='block','공유 버튼은 두 모드 모두에서 보인다');
 ok(D.best===900,'일반 모드 점수는 일일 기록을 건드리지 않는다','best='+D.best);
 
+A.startGame('daily'); A.stage=11; A.score=900; A.gameOver();
 const st=A.shareText();
-ok(st.includes('오늘의 도전')&&st.includes('900')&&st.includes('11단계'),'공유 문구에 날짜·점수·단계가 들어간다','"'+st.replace(/\n/g,' / ')+'"');
+ok(st.includes('오늘의 도전')&&st.includes('900')&&st.includes('11단계'),'일일 도전 공유 문구에 날짜·점수·단계','"'+st.replace(/\n/g,' / ')+'"');
+A.startGame('endless'); A.stage=6; A.score=120;
+const st2=A.shareText();
+ok(!st2.includes('오늘의 도전')&&st2.includes('120'),'일반 모드 공유 문구는 날짜를 쓰지 않는다','"'+st2.replace(/\n/g,' / ')+'"');
+
+hdr('13c. 공유 이미지 카드');
+// 구역별 적중이 쌓이는가
+A.startGame('daily'); A.stage=5; A.setupStage(); A.newArrow();
+const R=A.runStats;
+ok(R.gwan===0&&R.ear===0&&R.teeter===0&&R.in===0,'판이 시작되면 구역 집계가 0부터');
+for(const z of ['gwan','in','ear','teeter','gwan']){ A.state='fly'; A.finishIn(z,A.pot.x,1.4); }
+ok(R.gwan===2&&R.in===1&&R.ear===1&&R.teeter===1,'적중할 때마다 구역별로 집계된다',JSON.stringify(R));
+
+let cardErr=null, card=null;
+try{ card=A.makeCard(); }catch(e){ cardErr=e&&(e.message||String(e)); }
+ok(cardErr===null,'공유 카드가 예외 없이 그려진다', cardErr||'');
+ok(card&&card.width===1080&&card.height===1350,'카드 크기 1080×1350 (4:5)', card?card.width+'×'+card.height:'(없음)');
+
+// 카드 레이아웃 실측 — 스텁 ctx 가 그리기 호출을 기록하게 해 글자 위치를 검사한다.
+// (픽셀 렌더는 못 하지만 캔버스 밖으로 나가거나 항아리와 겹치는 건 잡힌다)
+function recordCard(){
+  const calls=[];
+  const recCtx=()=>{ const st={font:'',textAlign:'left'}; return new Proxy(st,{
+    get(t,k){
+      if(k==='createLinearGradient'||k==='createRadialGradient') return ()=>({addColorStop:noop});
+      // font 는 "900 62px ..." 형태라 parseInt 로 뽑으면 두께(900)가 나온다 → px 를 집어서 쓴다
+      const px=()=>{ const m=/(\d+)px/.exec(t.font||''); return m?+m[1]:30; };
+      if(k==='measureText') return s=>({width:String(s).length*px()*0.6});
+      if(k==='fillText') return (s,x,y)=>calls.push({s:String(s),x,y,size:px(),align:t.textAlign});
+      if(k in t) return t[k];
+      return noop;
+    }, set(t,k,v){ t[k]=v; return true; } }); };
+  const prev=sandbox.document.createElement;
+  sandbox.document.createElement=tag=>({tag,width:0,height:0,style:{},getContext:recCtx,
+    toBlob:cb=>cb({}),click:noop,select:noop,remove:noop,appendChild:noop});
+  try{ A.makeCard(); } finally { sandbox.document.createElement=prev; }
+  return calls;
+}
+A.startGame('daily'); A.stage=9; A.score=777;
+for(const z of ['gwan','ear','in']) { A.state='fly'; A.finishIn(z,A.pot.x,1.4); }   // finishIn 은 점수를 더한다
+A.gameOver();
+const shownScore=A.daily.best;           // 일일 도전 카드는 '오늘 최고'를 보여준다
+const texts=recordCard();
+console.log('  카드 글자 '+texts.length+'개: '+texts.map(t=>`"${t.s}"@${Math.round(t.y)}`).join(' '));
+const CW=1080, CH=1350;
+const outOfFrame=texts.filter(t=>{ const w=t.s.length*t.size*0.6, L=t.align==='center'?t.x-w/2:t.x;
+  return t.y<0||t.y>CH||L<0||L+w>CW; });
+ok(outOfFrame.length===0,'모든 글자가 카드 안에 들어온다', outOfFrame.map(t=>'"'+t.s+'"').join(',')||'');
+// 항아리 + 꽂힌 화살이 차지하는 띠(565~945)에는 글자가 없어야 한다
+const overlap=texts.filter(t=>t.y>565&&t.y<945);
+ok(overlap.length===0,'글자가 항아리/화살과 겹치지 않는다', overlap.map(t=>'"'+t.s+'"@'+t.y).join(',')||'');
+const joined=texts.map(t=>t.s).join(' | ');
+ok(joined.includes('모두의 화살촉'),'카드에 게임 이름이 들어간다');
+ok(joined.includes(shownScore.toLocaleString()),'카드에 점수가 들어간다','기대 '+shownScore.toLocaleString());
+ok(joined.includes('9단계'),'카드에 도달 단계가 들어간다');
+ok(joined.includes('오늘의 도전'),'일일 도전 카드에 모드 표기');
+ok(joined.includes('오늘 최고'),'큰 숫자가 무엇인지 라벨이 붙는다');
+ok(/관 1/.test(joined)&&/귀 1/.test(joined),'카드에 구역별 적중이 들어간다', joined);
+ok(texts.some(t=>t.s.includes('tuho.html')&&t.y>CH-120),'카드 하단에 접속 주소');
+
+// 판을 새로 시작하면 집계가 리셋되어야 한다 (이전 판 기록이 카드에 새지 않도록)
+A.startGame('endless');
+ok(A.runStats.gwan===0&&A.runStats.in===0,'새 판 시작 시 구역 집계 초기화',JSON.stringify(A.runStats));
+let cardErr2=null; try{ A.makeCard(); }catch(e){ cardErr2=e&&(e.message||String(e)); }
+ok(cardErr2===null,'일반 모드에서도 카드가 그려진다', cardErr2||'');
 
 hdr('12. 렌더 스모크 — 모든 상태/변주에서 예외 없이 그려지는가');
 let renderErr=null, renders=0;

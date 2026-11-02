@@ -62,7 +62,7 @@
 <div id="msg"></div>
 <div id="sub"></div>
 <div id="toast"></div>
-<div id="ver">모두의 화살촉 v0.4 · 관(貫)·귀(耳) 3구역 · 5발 단계제</div>
+<div id="ver">모두의 화살촉 v0.5 · 관(貫)·귀(耳) 3구역 · 5발 단계제</div>
 
 <div id="start" class="ov">
   <h1>🏹 모두의 화살촉</h1>
@@ -141,7 +141,7 @@ function saveBest(){ try{ localStorage.setItem('tuho_best',best); }catch(e){} }
 // 날짜 시드 난수 rnd() 로만 뽑는다. 연출용 난수(파티클·화면 흔들림·꽂힌 각도)는
 // 판의 내용과 무관하므로 Math.random 을 그대로 쓴다 — 시드를 소모하면 재현이 깨진다.
 let mode='endless', rngState=0;
-const VER_TEXT='모두의 화살촉 v0.4 · 관(貫)·귀(耳) 3구역 · 5발 단계제';
+const VER_TEXT='모두의 화살촉 v0.5 · 관(貫)·귀(耳) 3구역 · 5발 단계제';
 function dayKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function todayKey(){ return dayKey(new Date()); }
 function prevKey(k){ const d=new Date(k+'T12:00:00'); d.setDate(d.getDate()-1); return dayKey(d); }
@@ -208,6 +208,7 @@ let slowT=0, paused=false;
 let mod={};                  // 현재 단계 변주
 let lastResult='';
 let continuedThisRun=false;
+let runStats={gwan:0,ear:0,teeter:0,in:0};   // 이번 판의 구역별 적중 — 공유 카드에 쓴다
 
 // ---- AdMob (Capacitor 네이티브 앱에서만 동작; 웹/터널은 무시) ----
 // AdMob 앱 ca-app-pub-9017259597860535~8529649054 (AndroidManifest 의 APPLICATION_ID 와 같아야 한다)
@@ -429,8 +430,8 @@ function gameOver(){
   }
   // 일일 도전은 모두가 같은 판이라야 비교가 되므로 '이어하기'를 막는다.
   $('continueBtn').style.display = (daily_||continuedThisRun) ? 'none' : 'block';
-  $('shareBtn').style.display = daily_ ? 'block' : 'none';
-  $('shareBtn').textContent='📋 결과 복사';
+  $('shareBtn').style.display='block';        // 공유 카드는 두 모드 모두에서
+  $('shareBtn').textContent='📤 결과 공유';
   $('overBtn').textContent = daily_ ? '다시 도전' : '다시 하기';
   $('over').classList.remove('hidden');
   sfx.miss(); sfx.vib([40,60,40]);
@@ -453,7 +454,7 @@ const ZONE={
   teeter:{mul:1.5, msg:'한 끗! 턱에서 쏙!! 😮', col:'#ffb14d'}
 };
 function finishIn(z,cx,tanPhi){
-  const Z=ZONE[z]; combo++; inCount++;
+  const Z=ZONE[z]; combo++; inCount++; runStats[z]=(runStats[z]||0)+1;
   meta.totalIn++; if(meta.totalIn===1)unlock('in1'); saveMeta();
   if(z==='gwan')unlock('gwan'); if(z==='ear')unlock('ear'); if(z==='teeter')unlock('hankut');
   if(combo>=5)unlock('c5');
@@ -820,6 +821,7 @@ function startGame(m){
   mode = m==='daily' ? 'daily' : 'endless';
   if(mode==='daily'){ rollDaily(); rngState=seedFrom('tuho-'+daily.date); }
   score=0; combo=0; stage=1; paused=false; continuedThisRun=false;
+  runStats={gwan:0,ear:0,teeter:0,in:0};
   setupStage.prev='';        // 변주 순서도 시드에 포함된다 — 이전 판의 잔재가 남으면 재현이 깨진다
   parts=[]; toastQ=[]; $('pauseBtn').textContent='⏸';
   $('start').classList.add('hidden'); $('over').classList.add('hidden');
@@ -837,9 +839,114 @@ function paintStartScreen(){
 }
 function shareText(){
   const d=dailyView();
-  return '🏹 모두의 화살촉 · 오늘의 도전 '+d.date+'\n'
-    +d.stage+'단계 · '+d.best+'점'+(d.streak>1?' · 🔥'+d.streak+'일 연속':'')+'\n'
-    +'같은 판으로 겨뤄봐요!';
+  return mode==='daily'
+    ? ('🏹 모두의 화살촉 · 오늘의 도전 '+d.date+'\n'+d.stage+'단계 · '+d.best+'점'
+       +(d.streak>1?' · 🔥'+d.streak+'일 연속':'')+'\n같은 판으로 겨뤄봐요!')
+    : ('🏹 모두의 화살촉\n'+stage+'단계 · '+score+'점 (최고 '+best+')\n투호 한 판 어때요?');
+}
+
+// ---- 공유 이미지 카드 ----
+// 1080×1350(4:5) — 인스타·카톡에 그대로 올라가는 비율.
+// 게임과 같은 팔레트·같은 항아리로 그려서, 카드 한 장만 봐도 무슨 게임인지 읽히게 한다.
+function makeCard(){
+  const CW=1080, CH=1350, cx=CW/2, gy=CH*0.70;
+  const cvs=document.createElement('canvas'); cvs.width=CW; cvs.height=CH;
+  const g=cvs.getContext('2d');
+  const F=(s,w)=>g.font=(w||800)+' '+s+'px "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif';
+  const RR=(x,y,w,h,r)=>{ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); };
+  const isD = mode==='daily', d = dailyView();
+  const sc = isD ? d.best : score, st = isD ? d.stage : stage;
+
+  // 하늘 · 해 · 산 · 땅 (게임 배경과 동일한 색)
+  let sky=g.createLinearGradient(0,0,0,gy);
+  sky.addColorStop(0,'#24405e'); sky.addColorStop(.55,'#4a6a7e'); sky.addColorStop(1,'#caa36e');
+  g.fillStyle=sky; g.fillRect(0,0,CW,gy);
+  const sg=g.createRadialGradient(CW*0.80,gy*0.30,10,CW*0.80,gy*0.30,200);
+  sg.addColorStop(0,'rgba(255,238,200,.9)'); sg.addColorStop(1,'rgba(255,238,200,0)');
+  g.fillStyle=sg; g.fillRect(CW*0.80-200,gy*0.30-200,400,400);
+  g.fillStyle='#ffe9b8'; g.beginPath(); g.arc(CW*0.80,gy*0.30,60,0,Math.PI*2); g.fill();
+  const hill=(baseY,amp,col)=>{ g.fillStyle=col; g.beginPath(); g.moveTo(0,gy); g.lineTo(0,baseY);
+    for(let x=0;x<=CW;x+=CW/6) g.lineTo(x,baseY-Math.sin(x/CW*Math.PI*1.4+baseY)*amp); g.lineTo(CW,gy); g.closePath(); g.fill(); };
+  hill(gy-130,80,'rgba(60,78,96,.6)'); hill(gy-58,60,'rgba(74,90,78,.7)');
+  const gg=g.createLinearGradient(0,gy,0,CH); gg.addColorStop(0,'#7a5832'); gg.addColorStop(1,'#43301c');
+  g.fillStyle=gg; g.fillRect(0,gy,CW,CH-gy);
+  g.strokeStyle='rgba(255,230,180,.22)'; g.lineWidth=4; g.beginPath(); g.moveTo(0,gy); g.lineTo(CW,gy); g.stroke();
+
+  // 항아리 (게임과 같은 비율: 귀 = 입구×0.30, 오프셋 ×0.75)
+  const m=186, pw=352, ph=250, ry=gy-ph, ew=m*0.30, eo=m*0.75;
+  g.fillStyle='rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(cx,gy+8,pw*0.42,16,0,0,Math.PI*2); g.fill();
+  const pot=(x,w)=>{ const lg=g.createLinearGradient(x-w/2,0,x+w/2,0);
+    lg.addColorStop(0,'#6b4a2a'); lg.addColorStop(.5,'#9c6c3c'); lg.addColorStop(1,'#5a3e22'); return lg; };
+  for(const s of [-1,1]){ const ex=cx+s*eo; g.fillStyle=pot(ex,ew*1.2); RR(ex-ew/2-4,ry,ew+8,ew*1.6,ew*0.35); g.fill();
+    g.fillStyle='#241607'; g.beginPath(); g.ellipse(ex,ry,ew/2,ew*0.24,0,0,Math.PI*2); g.fill(); }
+  g.fillStyle=pot(cx,pw); g.beginPath();
+  g.moveTo(cx-m/2,ry);
+  g.bezierCurveTo(cx-pw/2,ry+ph*0.22, cx-pw/2,ry+ph*0.72, cx-pw*0.30,ry+ph);
+  g.lineTo(cx+pw*0.30,ry+ph);
+  g.bezierCurveTo(cx+pw/2,ry+ph*0.72, cx+pw/2,ry+ph*0.22, cx+m/2,ry);
+  g.closePath(); g.fill();
+  g.fillStyle='#241607'; g.beginPath(); g.ellipse(cx,ry,m/2,m*0.18,0,0,Math.PI*2); g.fill();
+  g.strokeStyle='rgba(0,0,0,.18)'; g.lineWidth=8; g.beginPath(); g.moveTo(cx-pw*0.42,ry+ph*0.5); g.lineTo(cx+pw*0.42,ry+ph*0.5); g.stroke();
+  // 꽂힌 화살 — 이번 판에 넣은 수만큼 (최대 7)
+  const hits=Math.min(7,(runStats.gwan||0)+(runStats.ear||0)+(runStats.teeter||0)+(runStats.in||0));
+  for(let i=0;i<hits;i++){
+    const t=hits===1?0:(i/(hits-1)-0.5), ax=cx+t*m*0.62, tilt=t*0.3;
+    g.save(); g.translate(ax,ry+6); g.rotate(tilt);
+    g.strokeStyle='#caa15a'; g.lineWidth=9; g.beginPath(); g.moveTo(0,0); g.lineTo(0,-130); g.stroke();
+    g.fillStyle=(i===0&&runStats.gwan)?'#ffe14d':'#e9edf2';
+    g.beginPath(); g.moveTo(0,-130); g.lineTo(-16,-108); g.lineTo(0,-116); g.lineTo(16,-108); g.closePath(); g.fill();
+    g.restore();
+  }
+
+  // 글자
+  g.textAlign='center';
+  g.shadowColor='rgba(0,0,0,.45)'; g.shadowBlur=14; g.shadowOffsetY=4;
+  F(62,900); g.fillStyle='#ffcf5c'; g.fillText('🏹 모두의 화살촉',cx,132);
+  g.shadowBlur=8;
+  F(34,800); g.fillStyle='#ffe6b0';
+  g.fillText(isD ? ('📅 오늘의 도전 · '+d.date) : '끝없는 도전', cx, 206);
+  // 큰 숫자가 '이번 판'인지 '오늘 최고'인지 라벨로 분명히 한다
+  F(32,800); g.fillStyle='rgba(255,230,176,.85)'; g.fillText(isD?'오늘 최고':'점수', cx, 300);
+  F(168,900); g.fillStyle='#fff'; g.fillText(sc.toLocaleString(), cx, 460);
+  F(44,800); g.fillStyle='#ffe14d'; g.fillText(st+'단계 도달', cx, 530);
+  // 구역별 적중
+  const parts2=[];
+  if(runStats.gwan) parts2.push('관 '+runStats.gwan);
+  if(runStats.ear) parts2.push('귀 '+runStats.ear);
+  if(runStats.teeter) parts2.push('한 끗 '+runStats.teeter);
+  if(runStats.in) parts2.push('들어감 '+runStats.in);
+  F(38,800); g.fillStyle='#ffe6b0';
+  g.fillText(parts2.length?parts2.join('  ·  '):'다음 판엔 더 멀리!', cx, 1058);
+  if(isD && d.streak>1){ F(34,800); g.fillStyle='#ff9a4a'; g.fillText('🔥 '+d.streak+'일 연속 도전', cx, 1118); }
+  g.shadowBlur=0; g.shadowOffsetY=0;
+  F(28,700); g.fillStyle='rgba(255,230,176,.72)';
+  g.fillText('seungiljang.github.io/games/tuho.html', cx, CH-52);
+  return cvs;
+}
+function cardBlob(){ return new Promise(res=>makeCard().toBlob(res,'image/png')); }
+/** 이미지 공유 → 실패하면 다운로드 → 그것도 안 되면 문구 복사. 단계마다 떨어뜨린다. */
+async function shareCard(btn){
+  const say=t=>{ if(btn) btn.textContent=t; };
+  try{
+    const blob=await cardBlob();
+    if(!blob) throw new Error('blob 생성 실패');
+    const file=new File([blob],'모두의화살촉.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],text:shareText()}); say('✅ 공유함'); return;
+    }
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='모두의화살촉.png'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    say('✅ 이미지 저장됨');
+  }catch(err){
+    if(err && err.name==='AbortError'){ say('📤 결과 공유'); return; }   // 사용자가 공유창을 닫음
+    try{ await navigator.clipboard.writeText(shareText()); say('✅ 문구 복사됨'); }
+    catch(e2){
+      try{ const ta=document.createElement('textarea'); ta.value=shareText(); ta.style.cssText='position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); say('✅ 문구 복사됨'); }
+      catch(e3){ say('공유 실패'); }
+    }
+  }
 }
 $('startBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); startGame('endless'); });
 $('dailyBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); startGame('daily'); });
@@ -849,16 +956,10 @@ $('backBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropa
   $('over').classList.add('hidden'); paintStartScreen(); $('start').classList.remove('hidden'); });
 $('shareBtn').addEventListener('pointerdown',async e=>{
   e.preventDefault(); e.stopPropagation();
-  const t=shareText(), b=$('shareBtn');
-  try{
-    if(navigator.share) await navigator.share({text:t});
-    else { await navigator.clipboard.writeText(t); b.textContent='✅ 복사됨!'; }
-  }catch(err){
-    try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.cssText='position:fixed;opacity:0';
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); b.textContent='✅ 복사됨!'; }
-    catch(e2){ b.textContent='복사 실패'; }
-  }
-  setTimeout(()=>{ if($('shareBtn')) $('shareBtn').textContent='📋 결과 복사'; },1600);
+  const b=$('shareBtn'); b.style.pointerEvents='none'; b.textContent='⏳ 카드 만드는 중…';
+  await shareCard(b);
+  b.style.pointerEvents='auto';
+  setTimeout(()=>{ if($('shareBtn')) $('shareBtn').textContent='📤 결과 공유'; },1800);
 });
 $('continueBtn').addEventListener('pointerdown',async e=>{
   e.preventDefault(); e.stopPropagation();
