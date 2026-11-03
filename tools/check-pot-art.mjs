@@ -17,54 +17,7 @@
  *   귀 림과 입구 림의 y 차이 = 0            (판정면이 하나의 수평선이므로)
  */
 import fs from 'node:fs';
-import zlib from 'node:zlib';
-
-// ---------- 최소 PNG 디코더 (8bit, 인터레이스 없음) ----------
-function decodePNG(buf) {
-  if (buf.readUInt32BE(0) !== 0x89504e47) throw new Error('PNG이 아닙니다');
-  const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
-  const depth = buf[24], color = buf[25], interlace = buf[28];
-  if (depth !== 8) throw new Error(`비트심도 ${depth} 미지원 (8만)`);
-  if (interlace !== 0) throw new Error('인터레이스 PNG 미지원');
-  const ch = { 0: 1, 2: 3, 4: 2, 6: 4 }[color];
-  if (!ch) throw new Error(`컬러타입 ${color} 미지원`);
-
-  const idat = [];
-  let o = 8;
-  while (o < buf.length) {
-    const len = buf.readUInt32BE(o);
-    const type = buf.toString('ascii', o + 4, o + 8);
-    if (type === 'IDAT') idat.push(buf.subarray(o + 8, o + 8 + len));
-    if (type === 'IEND') break;
-    o += 12 + len;
-  }
-  const raw = zlib.inflateSync(Buffer.concat(idat));
-
-  const stride = w * ch;
-  const out = Buffer.alloc(stride * h);
-  let p = 0;
-  for (let y = 0; y < h; y++) {
-    const ft = raw[p++];
-    const line = raw.subarray(p, p + stride); p += stride;
-    const cur = out.subarray(y * stride, (y + 1) * stride);
-    const prev = y ? out.subarray((y - 1) * stride, y * stride) : null;
-    for (let i = 0; i < stride; i++) {
-      const a = i >= ch ? cur[i - ch] : 0;
-      const b = prev ? prev[i] : 0;
-      const c = (prev && i >= ch) ? prev[i - ch] : 0;
-      let v = line[i];
-      if (ft === 1) v += a;
-      else if (ft === 2) v += b;
-      else if (ft === 3) v += (a + b) >> 1;
-      else if (ft === 4) {
-        const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
-        v += (pa <= pb && pa <= pc) ? a : (pb <= pc ? b : c);
-      }
-      cur[i] = v & 255;
-    }
-  }
-  return { w, h, ch, data: out, hasAlpha: color === 6 || color === 4 };
-}
+import { decodePNG } from './png.mjs';
 
 // ---------- 측정 ----------
 const file = process.argv[2];
