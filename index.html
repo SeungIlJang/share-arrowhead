@@ -212,8 +212,8 @@ let runStats={gwan:0,ear:0,teeter:0,in:0};   // 이번 판의 구역별 적중 �
 
 // ---- AdMob (Capacitor 네이티브 앱에서만 동작; 웹/터널은 무시) ----
 // AdMob 앱 ca-app-pub-9017259597860535~8529649054 (AndroidManifest 의 APPLICATION_ID 와 같아야 한다)
-// 개발 중 실광고를 누르면 계정이 정지될 수 있으니, 테스트할 때만 AD_USE_TEST=true 로 되돌린다.
-const AD_USE_TEST = false;
+// 실광고를 직접 누르면 계정이 정지된다(2026-11-02 실제로 29일 정지됨). 테스트는 반드시 테스트 트랙 빌드로 한다.
+const AD_USE_TEST = typeof navigator!=='undefined' && /MSAdsTest/.test(navigator.userAgent); // 테스트 트랙 빌드(capacitor.config appendUserAgent 에 MSAdsTest)면 구글 테스트 광고 → 눌러도 계정 무영향
 const AD_BANNER_TEST = 'ca-app-pub-3940256099942544/6300978111', AD_BANNER_REAL = 'ca-app-pub-9017259597860535/5133541554';
 const AD_INTER_TEST  = 'ca-app-pub-3940256099942544/1033173712', AD_INTER_REAL  = 'ca-app-pub-9017259597860535/4520579293';
 const AD_REWARD_TEST = 'ca-app-pub-3940256099942544/5224354917', AD_REWARD_REAL = 'ca-app-pub-9017259597860535/8498071497';
