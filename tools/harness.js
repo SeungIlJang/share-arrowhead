@@ -292,6 +292,39 @@ for(const [w,h] of [[320,568],[360,640],[375,812],[414,896],[430,932],[768,1024]
 }
 sandbox.innerWidth=375; sandbox.innerHeight=812; A.resize();
 
+hdr('11b. 기기가 달라도 난이도가 같은가 (일일 도전의 "같은 판" 전제)');
+// 체감 난이도 = 사거리 ÷ 입구폭. 입구가 절대 px 였을 때는 320폭 85% ~ 430폭 115% 로
+// 35% 나 벌어져, 같은 시드를 줘도 기기마다 다른 게임이었다.
+{
+  const devs=[[320,568,'소형'],[360,640,'보통'],[375,812,'기준'],[414,896,'대형'],[430,932,'최대']];
+  const stages=[1,5,10,20,30];
+  const table={};
+  for(const [w,h,nm] of devs){
+    sandbox.innerWidth=w; sandbox.innerHeight=h; A.resize();
+    table[nm]=stages.map(s=>{
+      A.stage=s;
+      let p=null; for(let i=0;i<200;i++){ A.setupStage(); if(A.mod.mouthMul===1){p=Object.assign({},A.pot);break;} }
+      if(!p){ A.setupStage(); p=Object.assign({},A.pot); }
+      return (p.baseX-A.originX())/p.mouth;
+    });
+  }
+  for(const [w,h,nm] of devs)
+    console.log(`  ${nm} ${String(w).padStart(3)}x${h}  사거리/입구 = ${table[nm].map(v=>v.toFixed(2).padStart(5)).join(' ')}`);
+  const ref=table['기준'];
+  let worst=0, where='';
+  for(const [w,h,nm] of devs) table[nm].forEach((v,i)=>{
+    const d=Math.abs(v/ref[i]-1); if(d>worst){worst=d; where=`${nm} ${stages[i]}단계`;}
+  });
+  console.log(`  기준 대비 최대 편차 ${(worst*100).toFixed(1)}%  (${where})`);
+  ok(worst<=0.02,'모든 기기에서 체감 난이도가 동일하다 (편차 2% 이내)',(worst*100).toFixed(1)+'%');
+  // 입구가 1x 에서 보이는 크기인지도 같이 본다
+  sandbox.innerWidth=320; sandbox.innerHeight=568; A.resize(); A.stage=30; A.setupStage();
+  ok(A.pot.mouth>=22,'가장 작은 기기·가장 높은 단계에서도 입구가 보일 만큼 크다', A.pot.mouth.toFixed(1)+'px');
+  sandbox.innerWidth=430; sandbox.innerHeight=932; A.resize(); A.stage=1; A.setupStage();
+  ok(A.pot.mouth<=A.pot.w,'입구가 몸통보다 넓어지지 않는다', A.pot.mouth.toFixed(0)+' vs '+A.pot.w.toFixed(0));
+}
+sandbox.innerWidth=375; sandbox.innerHeight=812; A.resize();
+
 hdr('13. 일일 도전 — 같은 날이면 누구나 같은 판');
 /** 한 판을 처음부터 n단계까지 진행하며 (바람, 변주) 를 기록 */
 function stageSeq(m,n){

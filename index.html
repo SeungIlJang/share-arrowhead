@@ -62,7 +62,7 @@
 <div id="msg"></div>
 <div id="sub"></div>
 <div id="toast"></div>
-<div id="ver">모두의 화살촉 v0.5 · 관(貫)·귀(耳) 3구역 · 5발 단계제</div>
+<div id="ver">모두의 화살촉 v0.6 · 관(貫)·귀(耳) 3구역 · 5발 단계제</div>
 
 <div id="start" class="ov">
   <h1>🏹 모두의 화살촉</h1>
@@ -141,7 +141,7 @@ function saveBest(){ try{ localStorage.setItem('tuho_best',best); }catch(e){} }
 // 날짜 시드 난수 rnd() 로만 뽑는다. 연출용 난수(파티클·화면 흔들림·꽂힌 각도)는
 // 판의 내용과 무관하므로 Math.random 을 그대로 쓴다 — 시드를 소모하면 재현이 깨진다.
 let mode='endless', rngState=0;
-const VER_TEXT='모두의 화살촉 v0.5 · 관(貫)·귀(耳) 3구역 · 5발 단계제';
+const VER_TEXT='모두의 화살촉 v0.6 · 관(貫)·귀(耳) 3구역 · 5발 단계제';
 function dayKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function todayKey(){ return dayKey(new Date()); }
 function prevKey(k){ const d=new Date(k+'T12:00:00'); d.setDate(d.getDate()-1); return dayKey(d); }
@@ -262,15 +262,25 @@ function calibrate(){
   vHi = Math.max(mx*1.03, mn*1.16);
 }
 
+/** 단계 s 의 난이도 = 사거리가 입구폭의 몇 배인가. 이 값이 체감 난이도를 결정한다.
+ *  계수는 375×812 에서 기존(절대 px) 입구 크기와 2% 이내로 일치하도록 맞췄다. */
+function spanRatio(s){ return 2.45 + Math.min(4.94, s*0.235); }
+
 // 화면 크기·단계에 맞춰 항아리 형상과 보정값만 다시 계산 (진행 상황은 유지 → resize 안전)
 function layoutStage(){
   const s=stage;
+  pot.baseX = Math.min(W*0.80, W*0.52 + s*W*0.013);
+  // 난이도는 '사거리 ÷ 입구폭' 이 지배한다. 입구를 절대 px 로 두면 사거리만 화면 비례로
+  // 늘어나 큰 기기일수록 어려워진다(320폭 85% ~ 430폭 115%). 일일 도전이 "그날은 누구나
+  // 같은 판"을 내걸고 있으므로 이건 그냥 불균형이 아니라 약속 위반이다.
+  // → 입구를 사거리에서 역산한다. spanRatio 계수는 375×812 에서 기존 수치가 그대로
+  //   나오도록 맞췄으므로, 기준 기기 플레이어에게는 바뀌는 것이 없다.
+  const span = pot.baseX - originX();
+  pot.mouth = span / spanRatio(s) * (mod.mouthMul||1);
+  pot.w = pot.mouth / 0.52;
   pot.h = Math.min(H*0.15, 76 + s*1.6);
-  pot.w = Math.max(66, 104 - s*2);
-  pot.mouth = Math.max(34, 58 - s*1.7) * (mod.mouthMul||1);
   pot.earW  = pot.mouth*0.30;
   pot.earOff= pot.mouth*0.5 + pot.mouth*0.10 + pot.earW*0.5;
-  pot.baseX = Math.min(W*0.80, W*0.52 + s*W*0.013);
   pot.x = pot.baseX;
   pot.rimY = groundY()-pot.h;
   calibrate();
