@@ -59,6 +59,8 @@ vm.runInContext(code+'\n;globalThis.__api={get state(){return state},set state(v
   'get mode(){return mode},set mode(v){mode=v},get daily(){return daily},get rngState(){return rngState},set rngState(v){rngState=v},'+
   'speedOf,gravity,groundY,originX,originY,startGame,AMAX,ZONE,resize,layoutStage,calibrate,entryTan,afterResult,'+
   'get runStats(){return runStats},'+
+  'get ADS_ENABLED(){return ADS_ENABLED},get AD_BANNER(){return AD_BANNER},get AD_INTER(){return AD_INTER},'+
+  'get AD_REWARD(){return AD_REWARD},get bannerShown(){return bannerShown},bottomRes,'+
   'nextStage,rollDaily,dailyView,seedFrom,todayKey,prevKey,shareText,paintStartScreen,makeCard,finishIn};',
   ctxv,{filename:'tuho.js'});
 const A=sandbox.__api;
@@ -66,6 +68,27 @@ const A=sandbox.__api;
 let fails=0, passes=0;
 function ok(cond,label,extra){ if(cond){passes++; console.log('  ✓ '+label);} else {fails++; console.log('  ✗ '+label+(extra?'  → '+extra:''));} }
 function hdr(t){ console.log('\n== '+t+' =='); }
+
+// ---------------------------------------------------------------
+// 맨 앞에 둔다. AdMob 계정 정지(2026-11-03 ~ 12-02) 기간에 광고가 한 번이라도
+// 나가면 계정 문제가 커진다. 배포본에만 스위치가 있어 소스를 덮어쓰면 되살아나던
+// 사고를 막기 위해, 이제 소스가 원본이고 하네스가 꺼짐을 확인한다.
+hdr('0. 광고 중단 스위치 (AdMob 계정 정지 대응)');
+{
+  ok(A.ADS_ENABLED===false,'ADS_ENABLED=false — 광고 전면 중단','ADS_ENABLED='+A.ADS_ENABLED);
+  ok(A.AD_BANNER==='' && A.AD_INTER==='' && A.AD_REWARD==='',
+     '배너·전면·리워드 광고 ID가 모두 비었다 (요청 자체가 안 나간다)',
+     `banner="${A.AD_BANNER}" inter="${A.AD_INTER}" reward="${A.AD_REWARD}"`);
+  ok(A.bannerShown===false && A.bottomRes()===0,'배너 자리를 화면에서 빼지 않는다');
+  // 리워드 버튼이 먹통이 되면 안 된다 — 광고 없이 보상을 지급하는 경로가 살아 있어야 한다
+  ok(/if\(!AD_REWARD\|\|!A\)\s*return true/.test(src),
+     '리워드는 광고 없이 보상이 지급된다 (버튼이 죽지 않는다)');
+  ok(/if\(!ADS_ENABLED\)\s*return;\s*const A=admob\(\)/.test(src),
+     'AdMob SDK 초기화 자체를 건너뛴다');
+  // 정지가 끝나면 알려 준다. 스위치를 영구히 잊고 수익이 0 으로 남는 쪽도 사고다.
+  const until=new Date('2026-12-02T23:59:59');
+  if(new Date()>until) console.log('  ! 정지 기간(~2026-12-02)이 지났다 — ADS_ENABLED 복구를 검토하라');
+}
 
 // ---------------------------------------------------------------
 hdr('1. 초기화 / 지오메트리');
