@@ -1,0 +1,1332 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>모두의 화살촉</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;height:100%;overflow:hidden;background:#13100c;touch-action:none;overscroll-behavior:none;font-family:system-ui,-apple-system,sans-serif}
+  #cv{display:block;width:100vw;height:100vh}
+  #hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none;z-index:5}
+  .pill{background:rgba(20,14,8,.72);border:1px solid #6a4e2a;border-radius:12px;padding:5px 9px;color:#ffe6b0;font-size:11px;font-weight:800;text-align:center;min-width:52px}
+  .pill b{display:block;font-size:18px;color:#fff;line-height:1.15}
+  #bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 56px);left:0;right:0;text-align:center;pointer-events:none;z-index:5}
+  #quiver{color:#ffe6b0;font-size:15px;font-weight:800;text-shadow:0 2px 3px #000;letter-spacing:1px}
+  #quiver .spent{opacity:.22}
+  #goal{color:#aef5b0;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000}
+  #goal.done{color:#ffe14d}
+  #wind{position:fixed;top:calc(env(safe-area-inset-top,0px) + 98px);left:0;right:0;text-align:center;color:#9fd0ff;font-size:13px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:16px}
+  #mod{position:fixed;top:calc(env(safe-area-inset-top,0px) + 118px);left:0;right:0;text-align:center;color:#ffbe6b;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:15px}
+  #hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);left:0;right:0;text-align:center;color:#ffe14d;font-size:15px;font-weight:800;text-shadow:0 2px 4px #000;pointer-events:none;z-index:5}
+  #msg{position:fixed;top:42%;left:0;right:0;text-align:center;font-size:29px;font-weight:900;color:#fff;text-shadow:0 3px 6px #000;opacity:0;transition:opacity .12s;pointer-events:none;z-index:6}
+  #sub{position:fixed;top:50%;left:0;right:0;text-align:center;font-size:14px;font-weight:700;color:#ffe6b0;text-shadow:0 2px 4px #000;opacity:0;transition:opacity .12s;pointer-events:none;z-index:6}
+  #toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,20,10,.94);border:1px solid #ffcf5c;border-radius:14px;padding:9px 16px;color:#ffe14d;font-size:13px;font-weight:800;opacity:0;transition:all .25s;pointer-events:none;z-index:9;white-space:nowrap}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  #ver{position:fixed;bottom:3px;left:0;right:0;text-align:center;color:#8a765a;font-size:10px;z-index:5;pointer-events:none}
+  .ov{position:fixed;inset:0;z-index:12;background:radial-gradient(120% 90% at 50% 25%,#3a281700,#160f08 92%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;text-align:center;padding:22px}
+  .ov h1{font-size:36px;color:#ffcf5c;text-shadow:0 0 10px #a35,0 3px 0 #7a4b12;letter-spacing:2px}
+  .ov p{font-size:13px;color:#e9d6bf;line-height:1.75}
+  .btn{pointer-events:auto;background:#ffcf5c;color:#5a3a10;font-size:21px;font-weight:900;border:none;border-radius:16px;padding:14px 46px;box-shadow:0 6px 0 #b5831f;cursor:pointer}
+  .btn2{pointer-events:auto;background:#2f7a4d;color:#fff;font-size:16px;font-weight:800;border:none;border-radius:14px;padding:11px 24px;box-shadow:0 5px 0 #1d5033;cursor:pointer}
+  .hidden{display:none!important}
+  #how{display:flex;gap:8px;justify-content:center}
+  #how div{background:rgba(255,255,255,.06);border:1px solid #6a4e2a;border-radius:12px;padding:9px 8px;width:92px;font-size:11px;color:#e9d6bf;line-height:1.5}
+  #how div b{display:block;font-size:15px;color:#ffcf5c;margin-bottom:3px}
+  .rec{font-size:12px;color:#caa15a;font-weight:800}
+  #btns{position:fixed;top:calc(env(safe-area-inset-top,0px) + 50px);right:8px;display:flex;flex-direction:column;gap:7px;z-index:8}
+  .iconbtn{pointer-events:auto;background:rgba(20,14,8,.72);border:1px solid #6a4e2a;border-radius:10px;color:#ffe6b0;font-size:17px;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  #rotate{display:none;position:fixed;inset:0;z-index:30;background:#13100c;color:#ffe6b0;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;font-weight:800;font-size:18px;padding:30px}
+  #rotate .ico{font-size:58px;animation:rot 1.6s ease-in-out infinite}
+  @keyframes rot{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
+  @media (orientation:landscape){ #rotate{display:flex} }
+  .has-banner #ver{display:none}
+</style></head>
+<body>
+<canvas id="cv"></canvas>
+<div id="hud">
+  <div class="pill">점수<b id="score">0</b></div>
+  <div class="pill">연속<b id="combo">0</b></div>
+  <div class="pill">층<b id="stage">1</b></div>
+  <div class="pill">최고<b id="best">0</b></div>
+</div>
+<div id="bar">
+  <div id="quiver"></div>
+  <div id="goal"></div>
+</div>
+<div id="btns">
+  <button class="iconbtn" id="muteBtn">🔊</button>
+  <button class="iconbtn" id="pauseBtn">⏸</button>
+</div>
+<div id="wind"></div>
+<div id="mod"></div>
+<div id="hint"></div>
+<div id="msg"></div>
+<div id="sub"></div>
+<div id="toast"></div>
+<div id="ver">모두의 화살촉 v0.7-proto · 누각 등반 · 한 층 5발</div>
+
+<div id="start" class="ov">
+  <h1>🏹 모두의 화살촉</h1>
+  <div id="how">
+    <div><b>당긴다</b>방향 = 각도<br>길이 = 힘</div>
+    <div><b>놓는다</b>궤적을 보며<br><u>직접</u> 겨눔</div>
+    <div><b>노린다</b>관 ×2.5<br>귀 ×2</div>
+  </div>
+  <p><b>투호(投壺)</b> — 누각을 한 층씩 오른다. 화살 <b>5발</b>로 한 층.<br/>
+  궤적은 <b>바람을 뺀</b> 길이에요. 깃발과 직전 발 자국을 읽어 <b>미리 겨누세요.</b><br/>
+  가운데는 안전하게, <b>귀(耳)</b>는 좁지만 2배. 욕심낼지는 당신 선택이에요.</p>
+  <button class="btn" id="startBtn">시작</button>
+  <div class="rec" id="startRec"></div>
+  <button class="btn2" id="dailyBtn">📅 오늘의 도전</button>
+  <div class="rec" id="dailyRec"></div>
+</div>
+
+<div id="over" class="ov hidden">
+  <h1>게임 오버</h1>
+  <p id="overSub">기록을 남겼어요!</p>
+  <button class="btn2" id="continueBtn">📺 광고 보고 이어하기 (화살 +3)</button>
+  <button class="btn2" id="shareBtn">📋 결과 복사</button>
+  <button class="btn" id="overBtn">다시 하기</button>
+  <button class="btn2" id="backBtn">처음으로</button>
+</div>
+
+<div id="rotate">
+  <div class="ico">📱↻</div>
+  <div>세로로 돌려주세요</div>
+  <div style="font-size:13px;color:#9a8666">모두의 화살촉은 세로 화면 게임이에요</div>
+</div>
+
+<script>
+/* ============================================================
+   모두의 화살촉 (투호) v0.3
+   - 과녁 3구역: 중앙(들어감/관) + 좌우 귀(耳)
+   - 한 단계 = 화살 5발, 목표 수 달성 시 통과 (빗나감은 사격 단서)
+   - 각도 = 궤적 모양(진입각) / 힘 = 거리  → 역할 분리
+   - 입구 통과 판정을 보간으로 정밀화, 몸통 충돌 실루엣 기반
+   ============================================================ */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function resize(){ DPR=Math.min(window.devicePixelRatio||1,2); W=innerWidth; H=innerHeight; cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
+addEventListener('resize',()=>{ resize(); if(typeof layoutStage==='function'&&pot) layoutStage(); }); resize();
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+
+// ---- audio ----
+let AC=null, muted=false;
+function initAudio(){ if(!AC){ try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended')AC.resume(); }
+function tone(f,d,t,g,slide){ if(!AC||muted)return; const o=AC.createOscillator(),v=AC.createGain(); o.type=t||'sine'; o.frequency.value=f; if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(1,slide),AC.currentTime+d); v.gain.value=g||0.12; v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+d); o.connect(v);v.connect(AC.destination); o.start();o.stop(AC.currentTime+d); }
+const sfx={
+  lock(){tone(620,0.05,'square',0.08);},
+  shoot(){ tone(520,0.09,'sawtooth',0.07,180); },   // 휙 — 바람 가르는 소리
+  // 먼저 나무에 '턱' 하고 꽂히는 저역, 그 위에 짧은 울림. 아르페지오만 쓰면 '딩' 하고 가벼워진다.
+  in(){ tone(190,0.13,'sine',0.26,90); tone(420,0.06,'square',0.10,260);
+        setTimeout(()=>tone(880,0.11,'triangle',0.13),60); },
+  gwan(){ tone(170,0.16,'sine',0.30,80); tone(520,0.07,'square',0.12,300);
+          [988,1318,1568].forEach((f,i)=>setTimeout(()=>tone(f,0.15,'triangle',0.17),60+i*62)); },
+  ear(){[520,780,1040].forEach((f,i)=>setTimeout(()=>tone(f,0.12,'square',0.12),i*60));},
+  teeter(){[1500,1200,900,1400].forEach((f,i)=>setTimeout(()=>tone(f,0.07,'sine',0.09),i*90));},
+  clink(){ tone(240,0.07,'sine',0.16,120); tone(1300,0.05,'square',0.09,520); },
+  thud(){tone(150,0.16,'sine',0.12,70);},
+  miss(){tone(180,0.26,'sawtooth',0.12,80);},
+  clear(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.2,'triangle',0.16),i*110));},
+  slow(){tone(300,0.3,'sine',0.05,240);},
+  vib(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
+};
+
+// ---- 저장 데이터 ----
+let best=0, meta={bestStage:1,totalIn:0,ach:{},legacyBest:0,legacyStage:0};
+try{ best=parseInt(localStorage.getItem('tuho_best')||'0')||0; }catch(e){}
+try{ const m=JSON.parse(localStorage.getItem('tuho_meta')||'null'); if(m) meta=Object.assign(meta,m); }catch(e){}
+// v0.7(세로 등반)로 넘어오며 기존 최고 기록을 따로 보관한다 — 지우지 않되 섞지도 않는다
+function migrateLegacy(){
+  if(meta.legacyBest||meta.legacyStage) return;
+  if(best>0||meta.bestStage>1){
+    meta.legacyBest=best; meta.legacyStage=meta.bestStage;
+    best=0; meta.bestStage=1; saveBest(); saveMeta();
+  }
+}
+function saveMeta(){ try{ localStorage.setItem('tuho_meta',JSON.stringify(meta)); }catch(e){} }
+function saveBest(){ try{ localStorage.setItem('tuho_best',best); }catch(e){} }
+
+// ---- 일일 도전 ----
+// 같은 날이면 누구나 똑같은 판을 받는다. 그래서 단계 생성에 쓰이는 난수(바람·변주)는
+// 날짜 시드 난수 rnd() 로만 뽑는다. 연출용 난수(파티클·화면 흔들림·꽂힌 각도)는
+// 판의 내용과 무관하므로 Math.random 을 그대로 쓴다 — 시드를 소모하면 재현이 깨진다.
+let mode='endless', rngState=0;
+const VER_TEXT='모두의 화살촉 v0.7-proto · 누각 등반 · 한 층 5발';
+function dayKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayKey(){ return dayKey(new Date()); }
+function prevKey(k){ const d=new Date(k+'T12:00:00'); d.setDate(d.getDate()-1); return dayKey(d); }
+function seedFrom(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function srand(){ rngState=(rngState+0x6D2B79F5)|0; let t=rngState; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }
+function rnd(){ return mode==='daily' ? srand() : Math.random(); }
+
+let daily={date:'',best:0,stage:1,plays:0,streak:0,last:''};
+try{ const d=JSON.parse(localStorage.getItem('tuho_daily')||'null'); if(d) daily=Object.assign(daily,d); }catch(e){}
+function saveDaily(){ try{ localStorage.setItem('tuho_daily',JSON.stringify(daily)); }catch(e){} }
+/** 화면 표시용 — 오늘 기록이 아니면 0으로 본다. 상태를 바꾸지 않는다. */
+function dailyView(){ const t=todayKey(); return daily.date===t ? daily : {date:t,best:0,stage:1,plays:0,streak:daily.streak||0,last:daily.last}; }
+/** 오늘 첫 판을 시작할 때만 호출 — 연속일을 올리고 오늘 기록을 연다. */
+function rollDaily(){
+  const t=todayKey();
+  if(daily.date!==t){
+    daily.streak = (daily.last===prevKey(t)) ? (daily.streak||0)+1 : 1;
+    daily.date=t; daily.best=0; daily.stage=1; daily.plays=0; daily.last=t;
+  }
+  daily.plays++; saveDaily();
+}
+
+// ---- 업적 ----
+const ACH=[
+  {id:'in1',   t:'첫 투호',       d:'화살을 처음 넣었다'},
+  {id:'gwan',  t:'관(貫)!',      d:'정중앙에 꽂았다'},
+  {id:'ear',   t:'귀(耳) 명인',   d:'항아리 귀에 넣었다'},
+  {id:'hankut',t:'한 끗',        d:'턱에 걸렸다가 들어갔다'},
+  {id:'c5',    t:'오연발',       d:'5연속 성공'},
+  {id:'all5',  t:'전관(全貫)',    d:'한 층에서 5발 전부 성공'},
+  {id:'s10',   t:'십층 궁사',     d:'10층 도달'},
+  {id:'s20',   t:'투호 신선',     d:'20층 도달'}
+];
+let toastQ=[], toastT=0;
+function unlock(id){ if(meta.ach[id])return; meta.ach[id]=1; saveMeta(); const a=ACH.find(x=>x.id===id); if(a) toastQ.push('🏅 '+a.t+' — '+a.d); }
+function pumpToast(dt){
+  const el=$('toast');
+  if(toastT>0){ toastT-=dt; if(toastT<=0) el.classList.remove('on'); return; }
+  if(toastQ.length && !el.classList.contains('on')){ el.textContent=toastQ.shift(); el.classList.add('on'); toastT=2.0; }
+}
+
+// ---- 단계 변주(모디파이어) ----
+const MODS=[
+  {id:'wind',  icon:'💨', name:'강풍',        desc:'바람이 거세다',              f:m=>{m.windMul=1.8; m.scoreMul=1.3;}},
+  {id:'sway',  icon:'🏺', name:'흔들 항아리',  desc:'항아리가 좌우로 움직인다',     f:m=>{m.sway=1; m.scoreMul=1.5;}},
+  {id:'narrow',icon:'🎯', name:'좁은 입구',    desc:'입구가 더 좁다',             f:m=>{m.mouthMul=0.8; m.scoreMul=1.6;}},
+  {id:'gold',  icon:'🥇', name:'황금 항아리',  desc:'점수 2배 보상 층',          f:m=>{m.gold=1; m.scoreMul=2;}}
+];
+
+// ---- 게임 상태 ----
+let state='start';  // start | aim | power | fly | result | clear | over
+let score=0, combo=0, stage=1;
+let arrowsLeft=5, arrowsTotal=5, inCount=0, quota=1, stageScore=0;
+let angle=28, aDir=1;        // 조준 각도(도), 핑퐁
+let power=0, pDir=1;         // 파워 0..1 핑퐁
+let wind=0;                  // 가로 바람 가속(px/s^2), + = 오른쪽
+let arrow=null, trail=[], parts=[];
+let stuck=[], ground=[];     // 항아리에 꽂힌 화살 / 땅에 박힌 화살 (단계별 누적 = 탄착군 단서)
+let crosses=[];              // 최근 빗나간 발들의 입구면 통과 x (바람 보정 단서, 최대 3)
+let resultT=0, clearT=0, shake=0, gt=0, lastTs=0, flash=0;
+let slowT=0, paused=false;
+let mod={};                  // 현재 단계 변주
+let lastResult='', lastZone='';
+let continuedThisRun=false;
+let runStats={gwan:0,ear:0,teeter:0,in:0};   // 이번 판의 구역별 적중 — 공유 카드에 쓴다
+
+// ---- AdMob (Capacitor 네이티브 앱에서만 동작; 웹/터널은 무시) ----
+// AdMob 앱 ca-app-pub-9017259597860535~8529649054 (AndroidManifest 의 APPLICATION_ID 와 같아야 한다)
+// 실광고를 직접 누르면 계정이 정지된다(2026-11-02 실제로 29일 정지됨). 테스트는 반드시 테스트 트랙 빌드로 한다.
+const AD_USE_TEST = typeof navigator!=='undefined' && /MSAdsTest/.test(navigator.userAgent); // 테스트 트랙 빌드(capacitor.config appendUserAgent 에 MSAdsTest)면 구글 테스트 광고 → 눌러도 계정 무영향
+const AD_BANNER_TEST = 'ca-app-pub-3940256099942544/6300978111', AD_BANNER_REAL = 'ca-app-pub-9017259597860535/5133541554';
+const AD_INTER_TEST  = 'ca-app-pub-3940256099942544/1033173712', AD_INTER_REAL  = 'ca-app-pub-9017259597860535/4520579293';
+const AD_REWARD_TEST = 'ca-app-pub-3940256099942544/5224354917', AD_REWARD_REAL = 'ca-app-pub-9017259597860535/8498071497';
+const AD_BANNER = AD_USE_TEST ? AD_BANNER_TEST : AD_BANNER_REAL;
+const AD_INTER  = AD_USE_TEST ? AD_INTER_TEST  : AD_INTER_REAL;
+const AD_REWARD = AD_USE_TEST ? AD_REWARD_TEST : AD_REWARD_REAL;
+// 제스처 바(홈 인디케이터) 높이. 이걸 margin 으로 넘기지 않으면 배너가 제스처 바와 겹친다.
+function safeBottomInset(){ try{ const p=document.createElement('div'); p.style.cssText='position:fixed;left:0;bottom:0;width:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none'; document.body.appendChild(p); const h=Math.round(p.getBoundingClientRect().height); p.remove(); return h; }catch(e){ return 0; } }
+let admobReady=false, bannerShown=false, interCount=0;
+function admob(){ const C=window.Capacitor; return (C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.AdMob)?C.Plugins.AdMob:null; }
+(async function(){ const A=admob(); if(!A)return; try{ await A.initialize({initializeForTesting:AD_USE_TEST}); admobReady=true; showBanner(); }catch(e){} })();
+async function showBanner(){ const A=admob(); if(!AD_BANNER||!A||bannerShown)return; bannerShown=true; try{document.body.classList.add('has-banner');}catch(e){} try{ await A.showBanner({adId:AD_BANNER,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:safeBottomInset(),isTesting:AD_USE_TEST}); }catch(e){ bannerShown=false; try{document.body.classList.remove('has-banner');}catch(e2){} } }
+async function showInterstitial(){ const A=admob(); if(!AD_INTER||!(admobReady&&A))return; try{ await A.prepareInterstitial({adId:AD_INTER,isTesting:AD_USE_TEST}); await A.showInterstitial(); }catch(e){} }
+async function showRewarded(){ const A=admob(); if(!AD_REWARD||!A) return true; /* 웹: 광고없음→보상지급(개발편의) */ try{ await A.prepareRewardVideoAd({adId:AD_REWARD,isTesting:AD_USE_TEST}); const r=await A.showRewardVideoAd(); return !!r; }catch(e){ return false; } }
+function bottomRes(){ return bannerShown ? 64 : 0; }
+
+// ---- 지오메트리 / 물리 (세로 등반) ----
+// 누각을 한 층씩 오른다. 발사대는 홀수층 왼쪽 / 짝수층 오른쪽이고, 항아리는 늘 반대편
+// 한 층 위에 있다. 한 발이 화면 폭을 가로지르며 한 층 올라간다.
+// 발사대는 화면상 늘 같은 높이(padY)에 있고, 층이 바뀔 때 세계가 아래로 흘러 올라간 느낌을 준다.
+const PAD_L=0.16, PAD_R=0.84;
+function dir(){ return stage%2===1 ? 1 : -1; }      // 1 = 오른쪽으로 던짐
+function padX(){ return dir()>0 ? W*PAD_L : W*PAD_R; }
+function padY(){ return H*0.84; }                    // 현재 층 발판 윗면 (화면 고정)
+function originX(){ return padX(); }
+function originY(){ return padY()-14; }
+// 한 층 상승폭. 가파를수록 고각 로브만 남아 조준 선택지가 붕괴한다(0.30H 에서 20층 4개).
+// 난이도 램프는 입구가 좁아지는 쪽(spanRatio)이 이미 담당하므로, 상승폭은 완만하게 둔다.
+function riseFor(s){ return H*Math.min(0.10, 0.06+s*0.003); }
+function tierY(s){ return padY()-riseFor(s); }       // 목표 층 발판 윗면
+// 중력을 1.9 → 4.0 으로 올렸다. 체공이 0.7초대면 화살이 "뜨는" 느낌(종이비행기)이 난다.
+// 0.4초대로 줄여야 손에서 떠난 것이 묵직하게 꽂히는 맛이 난다.
+function gravity(){ return H*4.0; }
+const AMAX_HARD=80;         // 각도 상한의 상한. 실제 상한은 층마다 궤적이 화면에 남도록 조인다
+const PHI_MIN=26;           // 입구 최소 진입각(도) — 이보다 얕은 각도는 '함정'이라 아예 제외
+let aLo=46, aHi=72, vLo=0, vHi=0;
+function speedOf(p){ return vLo+(vHi-vLo)*p; }
+let pot={x:0,baseX:0,rimY:0,w:0,h:0,mouth:0,earW:0,earOff:0};
+let camY=0;                 // 층 전환 중 세계를 아래로 미는 양 (렌더 전용)
+
+// ---- 손으로 던지기 ----
+// 투호는 무기를 겨누는 놀이가 아니라 손으로 던지는 놀이다. 2탭 스윕은 손맛이 없었고,
+// 당겼다 놓기는 새총처럼 '조준'하는 조작이라 여전히 계산이었다.
+// 이제 휘두른 속도와 방향이 그대로 던지기가 된다. 예측선은 없다 — 감각으로 던지고,
+// 떨어진 자리를 보고 다음 발을 교정하는 것이 이 게임의 전부다.
+//
+// 핵심 규칙: **휘두름 → 속도 매핑은 절대값이다.** 층마다 바뀌면 근육 기억이 매번
+// 초기화되어 손감각이 쌓이지 않는다. 층이 오르면 필요한 세기만 조금씩 늘어난다
+// (1층 843 → 30층 973 px/s, 전 층 매핑 범위 안).
+let dragging=false, dragCX=0, dragCY=0;
+let samples=[];                          // {x,y,t} 최근 휘두름 궤적
+let aimUX=0.7, aimUY=-0.7, aimPow=0;     // 마지막으로 '던진' 방향과 세기(연출·검증용)
+let throwFlash=0;                        // 던진 세기를 잠깐 보여주는 링
+let aimSpeed=0;                          // 마지막으로 던진 실제 속도(px/s)
+let needPow=-1;                          // 이번 발에 '필요했던' 세기 0..1 (교정용, -1 = 없음)
+/** 속도 → 휘두름 세기(0..1). swipeToSpeed 의 역함수 */
+function speedToPow(v){ const sc=Math.sqrt(gravity()*W); return clamp((v/sc-0.96)/0.72,0,1); }
+/** 지금 던진 각도로 항아리에 닿으려면 얼마나 세게 던졌어야 했나 */
+function neededPowNow(){
+  const v=solveSpeed(spanOf(), riseOf(), angle*Math.PI/180);
+  return v==null ? -1 : speedToPow(v);
+}
+const SWIPE_LO=0.35, SWIPE_HI=2.40;      // 초당 화면 높이 — 살살 ~ 힘껏
+/** 휘두른 속도(px/s) → 실제 발사 속도. 화면 크기에 비례하되 **층과는 무관**하다.
+ *  범위는 전 층이 쓰는 구간(필요 843~1156)이 휘두름의 12~75% 에 오도록 좁혔다.
+ *  너무 넓게 잡으면 손의 해상도가 낭비되고, 좁히면 미세 조절이 어려워진다. */
+function swipeToSpeed(vpx){
+  const sc=Math.sqrt(gravity()*W), u=vpx/H;
+  const t=clamp((u-SWIPE_LO)/(SWIPE_HI-SWIPE_LO),0,1);
+  return sc*(0.96+t*0.72);
+}
+/** 놓는 순간의 손 속도 — 마지막 90ms 구간으로 잰다 (전체 평균은 둔하다) */
+function releaseVelocity(){
+  if(samples.length<2) return null;
+  const last=samples[samples.length-1];
+  let first=samples[0];
+  for(let i=samples.length-1;i>=0;i--){ if(last.t-samples[i].t<=90){ first=samples[i]; } else break; }
+  const dt=(last.t-first.t)/1000;
+  if(dt<=0.004) return null;
+  const vx=(last.x-first.x)/dt, vy=(last.y-first.y)/dt;
+  const sp=Math.hypot(vx,vy);
+  if(sp<H*0.20) return null;             // 살짝 건드린 것은 던지기가 아니다
+  return {vx,vy,sp};
+}
+/** 표시용 각도(도) — 진입각 배지와 보정 계산이 이 값을 쓴다 */
+function aimAngle(){ return Math.atan2(-aimUY,Math.abs(aimUX))*180/Math.PI; }
+/** 각도(도)+힘으로 조준을 직접 세팅 — 자동 플레이·검증용 */
+function setAim(a,p){ const th=a*Math.PI/180; aimUX=Math.cos(th)*dir(); aimUY=-Math.sin(th);
+  // p 는 "이 층 기준 0..1" 이지만 aimPow 는 **절대 휘두름 척도**여야 한다.
+  // 둘을 섞으면 링에 그리는 "던진 세기"와 "필요했던 세기"가 다른 자에 찍힌다.
+  aimSpeed=speedOf(clamp(p,0,1)); aimPow=speedToPow(aimSpeed); angle=a; }
+// TODO(6단계): 렌더링을 누각 기준으로 다시 그릴 때 제거. 그때까지 옛 배경 코드가
+// 돌아가도록 바닥선을 발판 높이에 맞춰 둔다.
+function groundY(){ return padY(); }
+
+// ---- 누각 에셋 ----
+// Codex 납품물. design/ANCHORS.md 의 실측 앵커를 쓴다(납품 문서 값이 아니라).
+// 못 불러오면 절차적으로 그려서 게임이 멈추지 않게 한다.
+const ART={};
+const TIER_SURF=122/260, TIER_PAD=3/640, TIER_AR=260/640, COL_AR=900/420;
+(function(){ if(typeof Image==='undefined') return;
+  for(const [k,src] of [['col','assets/tuho-tower-column.png'],['tier','assets/tuho-tier.png'],
+                        ['sky','assets/tuho-sky-tall.png'],['cloud','assets/tuho-clouds.png'],
+                        ['star','assets/tuho-stars.png'],
+                        ['ring','assets/tuho-pull-ring.png'],['ret','assets/tuho-reticle.png'],
+                        ['hand','assets/tuho-hand-drag.png']]){
+    try{ const im=new Image(); im.onload=()=>{ART[k]=im;}; im.onerror=()=>{}; im.src=src; }catch(e){}
+  }
+})();
+let climbed=0;              // 지금까지 오른 총 높이 (기둥 타일 스크롤용)
+const hx=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+function mix(a,b,t){ const A=hx(a),B=hx(b);
+  return 'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')'; }
+function colW(){ return W*0.28; }
+function colEdge(out){ return W/2 + out*colW()/2; }
+/** 층 발판 하나. surfY = 발판 윗면 화면 y, out = +1 오른쪽 / -1 왼쪽 */
+function drawTier(surfY,out,alpha){
+  const tw=W*0.33, th=tw*TIER_AR, x0=colEdge(out);
+  ctx.save(); ctx.globalAlpha=alpha==null?1:alpha;
+  if(ART.tier){
+    ctx.translate(x0,surfY-th*TIER_SURF);
+    if(out<0){ ctx.scale(-1,1); }
+    ctx.drawImage(ART.tier, -tw*TIER_PAD*(out<0?1:1), 0, tw, th);
+  }else{                                   // 폴백 — 석재 슬래브 + 처마
+    const x=out>0?x0:x0-tw;
+    ctx.fillStyle='#9aa0a0'; rr(x,surfY,tw,9,2); ctx.fill();
+    ctx.fillStyle='#6f7676'; ctx.fillRect(x,surfY+9,tw,6);
+    ctx.fillStyle='#4a5a64'; rr(x+(out>0?0:tw*0.1),surfY+15,tw*0.9,10,4); ctx.fill();
+    ctx.fillStyle='#7a5331'; for(let i=1;i<5;i++) ctx.fillRect(x+tw*i/5,surfY+15,5,12);
+  }
+  ctx.restore();
+}
+
+/** 발사점에서 항아리 입구까지의 수평 거리(항상 양수) */
+function spanOf(){ return Math.abs(pot.baseX-originX()); }
+/** 발사점 대비 입구의 높이차(위로 +) */
+function riseOf(){ return originY()-pot.rimY; }
+
+// 이상 궤적이 입구면에 닿을 때의 진입 기울기(tanφ). 각도가 유효하지 않으면 null
+function entryTan(a){
+  const th=a*Math.PI/180, d=spanOf(), rise=riseOf();
+  const v=solveSpeed(d,rise,th); if(v==null) return null;
+  const c=Math.cos(th);
+  return gravity()*d/(v*v*c*c) - Math.tan(th);
+}
+// 단계 보정: ① 함정 각도 제거 ② 필요 파워가 게이지 중앙부에 오도록 속도 구간 재설정
+function calibrate(){
+  const tMin=Math.tan(PHI_MIN*Math.PI/180), d=spanOf(), rise=riseOf(), g=gravity();
+  // 상한: 궤적 정점이 화면 위로 사라지면 조준이 불가능하다. 층이 높아질수록 고각이
+  // 급격히 치솟으므로(20층 최고각 정점 1426px) 층마다 'apex ≤ 화면높이의 45%' 로 조인다.
+  const apexMax = H*0.52;
+  aHi=null;
+  for(let a=AMAX_HARD;a>=30;a--){
+    const v=solveSpeed(d,rise,a*Math.PI/180); if(v==null) continue;
+    const apex=(v*Math.sin(a*Math.PI/180))**2/(2*g);
+    if(apex<=apexMax){ aHi=a; break; }
+  }
+  if(aHi==null) aHi=46;
+  aLo=null;
+  for(let a=30;a<=aHi;a++){ const t=entryTan(a); if(t!=null && t>=tMin){ aLo=a; break; } }
+  if(aLo==null) aLo=Math.max(30,aHi-12);
+  let mn=Infinity, mx=0;
+  for(let a=aLo;a<=aHi;a++){ const v=solveSpeed(d,rise,a*Math.PI/180); if(v==null)continue; if(v<mn)mn=v; if(v>mx)mx=v; }
+  if(!isFinite(mn)||mn<=0){ mn=Math.sqrt(gravity()*W); mx=mn*1.2; }
+  vLo = mn*0.86;                                  // 아래쪽 구간은 '힘 부족'(짧게 떨어짐)
+  vHi = Math.max(mx*1.03, mn*1.16);
+}
+
+/** 단계 s 의 난이도 = 사거리가 입구폭의 몇 배인가. 이 값이 체감 난이도를 결정한다.
+ *  계수는 375×812 에서 기존(절대 px) 입구 크기와 2% 이내로 일치하도록 맞췄다. */
+// 세로 등반: 사거리가 길어 같은 비율이면 항아리가 발판을 넘친다(1층 폭 182px).
+// 하한을 올려 항아리 폭을 0.31W 이하로 묶는다. 후반 난이도(7.4)는 가로 때와 동일.
+function spanRatio(s){ return 4.20 + Math.min(3.20, s*0.17); }
+
+// 화면 크기·단계에 맞춰 항아리 형상과 보정값만 다시 계산 (진행 상황은 유지 → resize 안전)
+function layoutStage(){
+  const s=stage;
+  // 지그재그: 발사대 반대편 한 층 위
+  pot.baseX = dir()>0 ? W*PAD_R : W*PAD_L;
+  // 난이도는 '사거리 ÷ 입구폭' 이 지배한다. 입구를 절대 px 로 두면 사거리만 화면 비례로
+  // 늘어나 큰 기기일수록 어려워진다(320폭 85% ~ 430폭 115%). 일일 도전이 "그날은 누구나
+  // 같은 판"을 내걸고 있으므로 이건 그냥 불균형이 아니라 약속 위반이다.
+  // → 입구를 사거리에서 역산한다. spanRatio 계수는 375×812 에서 기존 수치가 그대로
+  //   나오도록 맞췄으므로, 기준 기기 플레이어에게는 바뀌는 것이 없다.
+  const span = Math.abs(pot.baseX - originX());
+  pot.mouth = span / spanRatio(s) * (mod.mouthMul||1);
+  pot.w = pot.mouth / 0.52;
+  pot.h = Math.min(H*0.095, 58 + s*1.0);   // 항아리가 높으면 그만큼 로브를 강요한다
+  pot.earW  = pot.mouth*0.30;
+  pot.earOff= pot.mouth*0.5 + pot.mouth*0.10 + pot.earW*0.5;
+  pot.x = pot.baseX;
+  pot.rimY = tierY(s) - pot.h;          // 항아리는 '한 층 위 발판' 위에 선다
+  calibrate();
+  if(state==='aim') angle=clamp(angle,aLo,aHi);
+}
+function setupStage(){
+  const s=stage;
+  mod={windMul:1,scoreMul:1,mouthMul:1,preview:1,sway:0,gold:0,pick:null,pick2:null};
+  if(s>=4){
+    let pool=MODS.filter(m=>m.id!==(setupStage.prev||''));
+    const p=pool[Math.floor(rnd()*pool.length)];
+    setupStage.prev=p.id; mod.pick=p; p.f(mod);
+    if(s>=15){                                   // 후반: 변주 2중 — 난이도가 평탄해지지 않도록
+      const pool2=MODS.filter(m=>m.id!==p.id && m.id!=='gold');
+      const q=pool2[Math.floor(rnd()*pool2.length)];
+      mod.pick2=q; q.f(mod);
+    }
+  } else setupStage.prev='';
+
+  layoutStage();
+
+  wind = 0;
+  if(s>=3){
+    wind = (rnd()*2-1)*(28+Math.min(170, s*9))*mod.windMul;
+    if(Math.abs(wind)<22) wind = wind<0?-22:22;
+  }
+  arrowsTotal = s>=10 ? 6 : 5;   // 후반엔 화살 1발 더
+  arrowsLeft = arrowsTotal;
+  inCount = 0; stageScore = 0;
+  quota = s<=2 ? 1 : s<=8 ? 2 : s<=16 ? 3 : 4;
+  stuck=[]; ground=[]; crosses=[];
+  paintBar();
+}
+// 궤적을 얼마나 보여줄지. 당겨서 쏘기는 궤적을 보며 빚는 조작이라 너무 짧으면 조작 자체가
+// 망가진다. 높은 층에서 약간의 외삽만 요구하는 선(0.65)까지만 줄인다.
+function previewFrac(){ return clamp(1-Math.max(0,stage-2)*0.035, 0.65, 1); }
+function powerSpeed(){ return Math.min(1.0, 0.52+stage*0.022); }
+function swayAmp(){ return Math.min(W*0.042, 8+stage*0.5); }
+const SWAY_W=1.1;
+function potAt(t){ return mod.sway ? pot.baseX + Math.sin((gt+t)*SWAY_W)*swayAmp() : pot.baseX; }
+// 흔들 항아리에서는 '화살이 도착할 때의 위치'를 겨냥해야 한다 → 선행 지점을 반복 계산
+function targetX(){
+  if(!mod.sway) return pot.x;
+  let tx=pot.x, th=angle*Math.PI/180;
+  for(let i=0;i<3;i++){
+    const v=solveSpeed(Math.abs(tx-originX()), originY()-pot.rimY, th); if(v==null) break;
+    tx = potAt(Math.abs(tx-originX())/(Math.cos(th)*v));
+  }
+  return tx;
+}
+
+// ---- 항아리 형상 헬퍼 ----
+function bodyHalf(y){            // 항아리 실루엣 반폭 (충돌용)
+  const t=(y-pot.rimY)/pot.h; if(t<0||t>1) return 0;
+  const k = t<0.5 ? t/0.5 : 1-((t-0.5)/0.5)*0.40;
+  return pot.mouth/2 + (pot.w/2 - pot.mouth/2)*k;
+}
+// 진입각이 얕으면 목(neck) 안쪽 턱에 걸린다 → 유효 입구가 좁아짐
+function mouthWindow(tanPhi){ return Math.max(pot.mouth*0.26, pot.mouth - (pot.mouth*0.30)/tanPhi); }
+function earWindow(tanPhi){ return Math.max(pot.earW*0.32, pot.earW - (pot.earW*0.55)/tanPhi); }
+
+// ---- 탄도 계산 ----
+// 거리 d, 고도차 rise(타깃이 위로 +), 각도 th 로 명중시키는 속도. 불가면 null
+function solveSpeed(d,rise,th){
+  const c=Math.cos(th), t=Math.tan(th), den=2*c*c*(d*t-rise);
+  if(den<=0 || d<=0) return null;
+  return Math.sqrt(gravity()*d*d/den);
+}
+function idealPower(){
+  const v=solveSpeed(Math.abs(targetX()-originX()), originY()-pot.rimY, angle*Math.PI/180);
+  if(v==null) return null;
+  const p=(v-vLo)/(vHi-vLo);
+  return (p<0||p>1.02) ? null : clamp(p,0,1);
+}
+function simArcV(vx0,vy0,frac,withWind){
+  const pts=[]; let x=originX(),y=originY(),vx=vx0,vy=vy0;
+  const g=gravity(), h=1/72, n=Math.floor(170*frac);
+  for(let i=0;i<n;i++){
+    vy+=g*h; if(withWind)vx+=wind*h; x+=vx*h; y+=vy*h;
+    // 항아리에 도달하면 끊는다. 가로 배치에서는 항아리가 바닥에 있어 그냥 땅까지 그려도
+    // 됐지만, 한 층 위에 있는 지금은 그대로 두면 목표를 190px 지나쳐 그려진다.
+    if(vy>0 && y>=pot.rimY && Math.abs(x-pot.x)<pot.w*0.6) { pts.push({x,y,end:2}); break; }
+    if(y>padY()+2||x>W+12||x<-12) { pts.push({x,y,end:1}); break; }
+    if(i%2===0) pts.push({x,y});
+  }
+  return pts;
+}
+// 각도+속도로도 부를 수 있게 (하네스·보정 계산이 쓴다)
+function simArc(th,sp,frac,withWind){
+  return simArcV(Math.cos(th)*sp*dir(), -Math.sin(th)*sp, frac, withWind);
+}
+
+// ---- 첫 층 시범 궤적 ----
+// 손감각 게임의 첫 벽은 경로가 아니라 "얼마나 세게?"를 아예 모른다는 것이다.
+// 아직 한 발도 못 넣어 본 손에게 1층에서만 들어가는 궤적을 점선으로 보여 준다.
+// 유령 화살이 실제 체공 시간대로 지나가므로 경로뿐 아니라 '세기'가 눈으로 읽힌다
+// — "이 정도면 되겠구나". 한 발이라도 넣으면 그 자리에서 사라지고, 누적 8발을
+// 넣은 손에는 다시 나오지 않는다. 가르치는 선이지 조준선이 아니다.
+const DEMO_TAUGHT=8;        // 누적 적중 이 정도면 세기 감각이 생겼다고 본다
+let demoT=0;
+// 휘두르는 중에도 남겨 둔다 — 보면서 따라 던질 수 있어야 가르치는 선이다.
+function demoOn(){
+  return state==='aim' && stage===1 && inCount===0
+      && throwFlash<0.01 && (meta.totalIn||0)<DEMO_TAUGHT;
+}
+/** 시범으로 보여 줄 한 발 — 중간 각도로 입구 중앙에 꽂히는 궤적 */
+function demoShot(){
+  const a=(aLo+aHi)/2, th=a*Math.PI/180;
+  const v=solveSpeed(spanOf(), riseOf(), th);
+  if(v==null) return null;
+  const pts=simArc(th,v,1,false);
+  if(pts.length<3) return null;
+  // simArcV 는 2스텝(=1/36초)마다 점을 남긴다 → 점 개수가 곧 체공 시간이다
+  return {a,v,pts,pow:speedToPow(v),flight:pts.length/36};
+}
+
+// ---- UI ----
+function clearMsg(){ $('msg').style.opacity=0; $('sub').style.opacity=0; }
+function showMsg(t,c){ const m=$('msg'); m.textContent=t; m.style.color=c||'#fff'; m.style.opacity=1; }
+function showSub(t){ const s=$('sub'); s.textContent=t||''; s.style.opacity=t?1:0; }
+function setTop(){ $('score').textContent=score; $('combo').textContent=combo; $('stage').textContent=stage+'층'; $('best').textContent=best; }
+function paintBar(){
+  let q=''; for(let i=0;i<arrowsTotal;i++) q += (i<arrowsLeft) ? '🏹' : '<span class="spent">🏹</span>';
+  $('quiver').innerHTML=q;
+  const g=$('goal'); const done=inCount>=quota;
+  g.textContent = (done?'✔ 통과 확정 ':'목표 ')+inCount+' / '+quota+(done?' · 남은 화살은 보너스!':' 넣기');
+  g.className = done?'done':'';
+  $('wind').textContent = (Math.abs(wind)>1)
+    ? ('💨 바람 '+(wind>0?'→':'←')+' '+'▮'.repeat(clamp(Math.round(Math.abs(wind)/32),1,6)))
+    : '바람 없음';
+  $('mod').textContent = mod.pick
+    ? (mod.pick.icon+' '+mod.pick.name+(mod.pick2?' + '+mod.pick2.icon+' '+mod.pick2.name:' — '+mod.pick.desc)
+       +(mod.scoreMul>1?'  (점수 ×'+(Math.round(mod.scoreMul*10)/10)+')':''))
+    : '';
+}
+
+// ---- 진행 ----
+function newArrow(){
+  arrow=null; trail=[]; slowT=0; dragging=false; aimPow=0; samples=[]; throwFlash=0;
+  const a0=(aLo+aHi)/2*Math.PI/180;                 // 기본 조준은 중간 각도
+  aimUX=Math.cos(a0)*dir(); aimUY=-Math.sin(a0); angle=(aLo+aHi)/2;
+  state='aim';
+  $('hint').textContent = demoOn() ? '점선처럼 — 이 정도 세기로 휙!' : '손으로 던지듯 휙 —';
+  clearMsg(); paintBar();
+}
+function nextStage(){ stage++; if(stage>meta.bestStage){meta.bestStage=stage; saveMeta();}
+  if(stage>=10)unlock('s10'); if(stage>=20)unlock('s20');
+  climbed+=riseFor(stage-1); camY=0;   // 올라선 만큼 기둥 타일도 함께 흐른다
+  setupStage(); newArrow(); setTop(); }
+
+function launch(){
+  const sp=aimSpeed;
+  arrow={ x:originX(), y:originY(), px:originX(), py:originY(),
+          vx:aimUX*sp, vy:aimUY*sp, ang:Math.atan2(aimUY,aimUX), noPot:false, hitBody:false };
+  throwFlash=1.25; needPow=neededPowNow();
+  arrowsLeft--; state='fly'; $('hint').textContent=''; sfx.vib([8,24]); sfx.shoot(); paintBar();
+}
+function tap(){
+  if(paused||state==='over'||state==='clear')return;
+  initAudio();
+  if(state==='result'){ if(resultT<0.15) return; afterResult(); }
+}
+function afterResult(){
+  clearMsg();
+  if(arrowsLeft>0){ newArrow(); return; }
+  if(inCount>=quota) stageClear(); else gameOver();
+}
+function stageClear(){
+  state='clear'; clearT=0;
+  const perfect = inCount>=5;
+  let bonus = Math.round((20+stage*9) * (perfect?2:1) * mod.scoreMul);
+  score += bonus; stageScore += bonus;
+  if(perfect) unlock('all5');
+  if(score>best){ best=score; saveBest(); }
+  showMsg(perfect?'전관(全貫)! 🏺✨':'한 층 올라간다! 🎊', perfect?'#ffe14d':'#aef5b0');
+  showSub((perfect?'5발 전부 명중 보너스 ×2 · ':'')+'통과 보너스 +'+bonus+'점 · 이 층 '+stageScore+'점');
+  sfx.clear(); sfx.vib([20,40,20,40]); flash=0.5;
+  for(let i=0;i<60;i++){ const a=Math.random()*Math.PI*2, sp=2+Math.random()*6;
+    parts.push({x:pot.x,y:pot.rimY,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-4,life:1.3,r:2+Math.random()*3,c:['#ffe14d','#fff','#ffcf5c','#ff9a4a','#aef5b0'][i%5]}); }
+  setTop();
+}
+function gameOver(){
+  state='over'; clearMsg(); arrow=null; trail=[]; interCount++;
+  const daily_ = mode==='daily';
+  const rec = daily_ ? (score>daily.best) : (score>=best && score>0);
+  if(score>best){ best=score; saveBest(); }
+  if(daily_ && score>daily.best){ daily.best=score; daily.stage=stage; saveDaily(); }
+  if(daily_){
+    $('overSub').innerHTML='📅 오늘의 도전 '+daily.date+'<br>'
+      +'<b>'+score+'</b>점 · '+stage+'층에서 멈춤'+(rec?' 🏆 <b>오늘 신기록!</b>':'')+'<br>'
+      +'오늘 최고 '+daily.best+'점 · '+daily.plays+'번째 시도'+(daily.streak>1?' · 🔥'+daily.streak+'일 연속':'');
+  } else {
+    $('overSub').innerHTML='최종 <b>'+score+'</b>점 · '+stage+'단계에서 멈춤<br>'
+      +'이 층에서 '+inCount+'/'+quota+' 넣음 · 최고 '+best+(rec?' 🏆 <b>신기록!</b>':'');
+  }
+  // 일일 도전은 모두가 같은 판이라야 비교가 되므로 '이어하기'를 막는다.
+  $('continueBtn').style.display = (daily_||continuedThisRun) ? 'none' : 'block';
+  $('shareBtn').style.display='block';        // 공유 카드는 두 모드 모두에서
+  $('shareBtn').textContent='📤 결과 공유';
+  $('overBtn').textContent = daily_ ? '다시 도전' : '다시 하기';
+  $('over').classList.remove('hidden');
+  sfx.miss(); sfx.vib([40,60,40]);
+}
+
+// ---- 판정 ----
+function judge(cx,tanPhi){
+  const e=Math.abs(cx-pot.x);
+  const win=mouthWindow(tanPhi), ew=earWindow(tanPhi);
+  if(e<=win/2) return (e<=win*0.17) ? {z:'gwan'} : {z:'in'};
+  if(e<=win/2+Math.max(2.5,pot.mouth*0.07)) return {z:'teeter'};
+  if(Math.abs(e-pot.earOff)<=ew/2) return {z:'ear',side:cx<pot.x?-1:1};
+  if(e<=pot.earOff+pot.earW/2+2) return {z:'rim'};
+  return null;  // 입구면을 벗어남 → 몸통/땅 판정으로
+}
+const ZONE={
+  gwan:  {mul:2.5, msg:'관(貫)! 정중앙 🎯', col:'#ffe14d'},
+  in:    {mul:1.0, msg:'들어갔다! 🏺',       col:'#aef5b0'},
+  ear:   {mul:2.0, msg:'귀(耳)에 꽂혔다! 👂', col:'#9fd0ff'},
+  teeter:{mul:1.5, msg:'한 끗! 턱에서 쏙!! 😮', col:'#ffb14d'}
+};
+function finishIn(z,cx,tanPhi){
+  const Z=ZONE[z]; lastZone=z; combo++; inCount++; runStats[z]=(runStats[z]||0)+1;
+  meta.totalIn++; if(meta.totalIn===1)unlock('in1'); saveMeta();
+  if(z==='gwan')unlock('gwan'); if(z==='ear')unlock('ear'); if(z==='teeter')unlock('hankut');
+  if(combo>=5)unlock('c5');
+  const comboMul = 1 + Math.min(10,combo)*0.1;
+  const gain = Math.round((10+stage*3) * Z.mul * comboMul * mod.scoreMul);
+  score += gain; stageScore += gain;
+  if(score>best){ best=score; saveBest(); }
+  state='result'; resultT=0; lastResult='in';
+  showMsg(Z.msg, Z.col);
+  showSub('+'+gain+'점  ·  '+Math.round(Z.mul*10)/10+'배 × 연속'+combo+'('+(Math.round(comboMul*10)/10)+'배)'
+    +(mod.scoreMul>1?' × 변주'+mod.scoreMul+'배':'')+'  ·  '+inCount+'/'+quota);
+  if(z==='gwan')sfx.gwan(); else if(z==='ear')sfx.ear(); else if(z==='teeter')sfx.teeter(); else sfx.in();
+  sfx.vib(z==='gwan'?[15,40,20,60]:[15,40,20]); shake=z==='gwan'?10:7; flash=z==='gwan'?0.35:0.2;
+  // 항아리에 꽂힌 화살 누적
+  const ox = z==='ear' ? (cx<pot.x?-pot.earOff:pot.earOff) : clamp(cx-pot.x,-pot.mouth*0.38,pot.mouth*0.38);
+  stuck.push({ox:ox, tilt:(Math.random()*0.26-0.13) - (1/Math.max(1,tanPhi))*0.25, z:z});
+  crosses=[];                 // 넣었으면 단서를 비운다
+  const n = z==='gwan'?46:30;
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, sp=2+Math.random()*5;
+    parts.push({x:cx,y:pot.rimY,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,life:0.95,r:2+Math.random()*3,c:['#ffe14d','#fff','#ffcf5c','#ff9a4a'][i%4]}); }
+  setTop(); paintBar();
+}
+function finishMiss(kind,cx){
+  combo=0; state='result'; resultT=0; lastResult='miss'; lastZone='';
+  const left=arrowsLeft, need=Math.max(0,quota-inCount);
+  const T={
+    short:['짧았어요 😵','힘이 모자랐어요'],
+    long :['넘어갔어요 😵','힘이 셌어요'],
+    rim  :['턱 맞고 튕김 😫','한 끗 모자랐어요'],
+    flat :['너무 평평해요 😫','더 띄워야 턱을 넘어요'],
+    body :['항아리 몸통 💥','조금 더 멀리'],
+    out  :['멀리 날아갔어요 😵','힘을 줄여요']
+  }[kind]||['빗나감 😵',''];
+  showMsg(T[0], '#ff9a9a');
+  let howText='';
+  if(needPow>=0){
+    const d=aimPow-needPow, ad=Math.abs(d);
+    const mag = ad<0.035?'아주 조금' : ad<0.10?'조금' : '많이';
+    if(ad>=0.015) howText = mag+(d>0?' 셌어요':' 약했어요')+' · ';
+  }
+  showSub(howText+T[1]+' · 남은 화살 '+left+'발'+(need>0?' / '+need+'발 더 필요':' · 통과 확정'));
+  sfx.vib(40); if(kind==='rim'||kind==='flat'){shake=6;}
+  if(cx!=null){ crosses.push(cx); if(crosses.length>3) crosses.shift(); }
+  setTop(); paintBar();
+}
+
+// ---- update ----
+function update(dt){
+  gt+=dt;
+  if(shake>0)shake=Math.max(0,shake-dt*40);
+  if(flash>0)flash=Math.max(0,flash-dt*2.2);
+  if(throwFlash>0)throwFlash=Math.max(0,throwFlash-dt*1.4);
+  demoT = demoOn() ? demoT+dt : 0;
+  for(const p of parts){ p.x+=p.vx*dt*60; p.y+=p.vy*dt*60; p.vy+=13.2*dt; p.life-=dt; }
+  parts=parts.filter(p=>p.life>0);
+  pumpToast(dt);
+
+  // 흔들 항아리 (조준 중에도, 비행 중에도 움직인다)
+  if(mod.sway && state!=='clear') pot.x = pot.baseX + Math.sin(gt*SWAY_W)*swayAmp();
+
+  if(state==='fly') flyStep(dt);
+  else if(state==='result'){ resultT+=dt; if(resultT>(lastResult==='in'?0.75:0.55)) afterResult(); }
+  else if(state==='clear'){
+    clearT+=dt;
+    // 층 전환: 세계를 아래로 흘려 '올라갔다'를 보여준다. 목표 층 발판이 내려와
+    // 다음 판의 발사대 자리(padY)에 정확히 멈춘다.
+    const T=0.55, k=Math.min(1,clearT/T), e=1-Math.pow(1-k,3);   // ease-out
+    camY = riseFor(stage)*e;
+    if(clearT>1.0){ camY=0; nextStage(); }
+  }
+}
+
+function flyStep(dt){
+  const steps=6, h=dt/steps, g=gravity();
+  for(let i=0;i<steps;i++){
+    const a=arrow;
+    a.px=a.x; a.py=a.y;
+    a.vy+=g*h; a.vx+=wind*h; a.x+=a.vx*h; a.y+=a.vy*h;
+    a.ang=Math.atan2(a.vy,a.vx);
+
+    // 1) 입구면(rim) 통과 — 교차점을 보간해 정확히 판정
+    if(!a.noPot && a.vy>0 && a.py<=pot.rimY && a.y>=pot.rimY){
+      const t=(pot.rimY-a.py)/Math.max(1e-6,(a.y-a.py));
+      const cx=a.px+(a.x-a.px)*t;
+      const tanPhi=Math.max(0.22, a.vy/Math.max(1e-6,Math.abs(a.vx)));
+      const r=judge(cx,tanPhi);
+      if(r){
+        if(r.z==='rim'){
+          sfx.clink(); a.vx*=-0.32; a.vy*=-0.34; a.noPot=true;
+          finishMiss(tanPhi<0.65?'flat':'rim', cx); return;
+        }
+        finishIn(r.z,cx,tanPhi); return;
+      }
+    }
+    // 2) 항아리 몸통 충돌
+    if(!a.noPot && a.y>pot.rimY && Math.abs(a.x-pot.x)<=bodyHalf(a.y)){
+      sfx.clink(); sfx.thud();
+      // 입구 바로 아래 + 거의 수평 진입 = 턱을 넘지 못한 '평사'
+      const flat = (a.y-pot.rimY)<pot.mouth*0.6 && (a.vy/Math.max(1,Math.abs(a.vx)))<0.6;
+      a.vx=-Math.abs(a.vx)*0.3; a.vy*=-0.25; a.noPot=true; a.hitBody=true;
+      finishMiss(flat?'flat':'body', a.x); return;
+    }
+    // 2b) 목표 층 발판에 꽂힘 — 항아리를 놓친 화살이 탄착군으로 남는다
+    if(!a.noPot && a.vy>0){
+      const ty=tierY(stage);
+      if(a.py<=ty && a.y>=ty){
+        const t=(ty-a.py)/Math.max(1e-6,(a.y-a.py)), cx=a.px+(a.x-a.px)*t;
+        const e0=colEdge(dir()), e1=e0+dir()*W*0.33;
+        if(cx>=Math.min(e0,e1) && cx<=Math.max(e0,e1)){
+          a.landed=true;
+          ground.push({x:clamp(cx,4,W-4), y:ty, ang:Math.atan2(a.vy,a.vx)});
+          for(let k=0;k<8;k++){ const sp=1+Math.random()*2;
+            parts.push({x:cx,y:ty,vx:(Math.random()-0.5)*sp*2,vy:-Math.random()*sp,life:0.45,r:1.5+Math.random()*2,c:'#9aa0a0'}); }
+          sfx.thud();
+          finishMiss(Math.abs(cx-originX())<spanOf()-pot.w*0.5?'short':'long', cx); return;
+        }
+      }
+    }
+    // 3) 발판 아래로 떨어짐 / 화면 밖
+    if(a.y>=padY()&&a.vy>0){
+      a.landed=true;
+      // 발판을 벗어나 아래로 떨어진 화살은 남기지 않는다(주워올 수 없는 곳)
+      for(let k=0;k<12;k++){ const sp=1+Math.random()*3;
+        parts.push({x:a.x,y:padY(),vx:(Math.random()-0.5)*sp*2,vy:-Math.random()*sp,life:0.55,r:1.5+Math.random()*2.5,c:'#9b7a4e'}); }
+      sfx.thud();
+      finishMiss(Math.abs(a.x-originX())<spanOf()-pot.w*0.5?'short':'long', a.x); return;
+    }
+    if(a.x>W+40||a.x<-40){ finishMiss('out',null); return; }
+  }
+  trail.push({x:arrow.x,y:arrow.y}); if(trail.length>26)trail.shift();
+
+  // 한 끗 슬로우모션: 하강 중 입구 근처에 아슬하게 접근할 때
+  const dy=pot.rimY-arrow.y, dx=Math.abs(arrow.x-pot.x);
+  if(arrow.vy>0 && dy>0 && dy<H*0.11 && dx<pot.w*1.1){ if(slowT<=0) sfx.slow(); slowT=0.12; }
+}
+
+// ---- render ----
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function potGrad(x,w){
+  const g=ctx.createLinearGradient(x-w/2,0,x+w/2,0);
+  if(mod.gold){ g.addColorStop(0,'#8a6412'); g.addColorStop(.45,'#f4cf5e'); g.addColorStop(.75,'#c79a27'); g.addColorStop(1,'#6f4f0d'); }
+  else { g.addColorStop(0,'#6b4a2a'); g.addColorStop(.5,'#9c6c3c'); g.addColorStop(1,'#5a3e22'); }
+  return g;
+}
+function drawEar(ex,ry,ew){
+  const eh=ew*1.6;
+  ctx.fillStyle=potGrad(ex,ew*1.2);
+  rr(ex-ew/2-2, ry, ew+4, eh, ew*0.35); ctx.fill();
+  ctx.fillStyle='#241607'; ctx.beginPath(); ctx.ellipse(ex,ry,ew/2,ew*0.24,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=mod.gold?'#f7e08a':'#3a2410'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(ex,ry,ew/2,ew*0.24,0,0,Math.PI*2); ctx.stroke();
+}
+function drawPot(){
+  const x=pot.x, ry=pot.rimY, w=pot.w, h=pot.h, m=pot.mouth;
+  ctx.save();
+  // 그림자
+  ctx.fillStyle='rgba(0,0,0,.26)'; ctx.beginPath(); ctx.ellipse(x,groundY()+3,w*0.42,7,0,0,Math.PI*2); ctx.fill();
+  // 귀(耳) — 몸통 뒤쪽에 먼저
+  drawEar(x-pot.earOff,ry,pot.earW); drawEar(x+pot.earOff,ry,pot.earW);
+  // 몸통
+  ctx.fillStyle=potGrad(x,w); ctx.beginPath();
+  ctx.moveTo(x-m/2,ry);
+  ctx.bezierCurveTo(x-w/2,ry+h*0.22, x-w/2,ry+h*0.72, x-w*0.30,ry+h);
+  ctx.lineTo(x+w*0.30,ry+h);
+  ctx.bezierCurveTo(x+w/2,ry+h*0.72, x+w/2,ry+h*0.22, x+m/2,ry);
+  ctx.closePath(); ctx.fill();
+  // 입구(어두운 구멍)
+  ctx.fillStyle='#241607'; ctx.beginPath(); ctx.ellipse(x,ry,m/2,m*0.18,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=mod.gold?'#f7e08a':'#3a2410'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(x,ry,m/2,m*0.18,0,0,Math.PI*2); ctx.stroke();
+  // 유효 입구 표시(조준 단계) — 진입각이 얕으면 좁아지는 걸 눈으로 보여줌
+  if(state==='aim'){
+    const win=mouthWindow(Math.max(0.22, entryTan(angle)||1.2));
+    ctx.fillStyle='rgba(120,255,160,.85)'; ctx.fillRect(x-win/2,ry-4,win,2.5);
+    ctx.fillStyle='rgba(255,220,120,.9)'; ctx.fillRect(x-m/2-1,ry-4,2.5,7); ctx.fillRect(x+m/2-1.5,ry-4,2.5,7);
+  }
+  // 몸통 띠 장식
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x-w*0.42,ry+h*0.5); ctx.lineTo(x+w*0.42,ry+h*0.5); ctx.stroke();
+  ctx.restore();
+}
+function drawStuckArrows(){
+  for(const s of stuck){
+    const bx=pot.x+s.ox, by=pot.rimY+(s.z==='ear'?2:4);
+    ctx.save(); ctx.translate(bx,by); ctx.rotate(Math.PI/2+s.tilt);
+    ctx.strokeStyle='#caa15a'; ctx.lineWidth=3.4; ctx.beginPath(); ctx.moveTo(-30,0); ctx.lineTo(2,0); ctx.stroke();
+    ctx.fillStyle=s.z==='gwan'?'#ffe14d':'#e9edf2'; ctx.beginPath();
+    ctx.moveTo(-30,0); ctx.lineTo(-22,-6); ctx.lineTo(-18,0); ctx.lineTo(-22,6); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+function drawGroundArrows(){
+  for(const a of ground){
+    ctx.save(); ctx.globalAlpha=0.8; ctx.translate(a.x,a.y==null?padY():a.y); ctx.rotate(clamp(a.ang,0.5,1.35));
+    ctx.strokeStyle='#8a7048'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-26,0); ctx.lineTo(4,0); ctx.stroke();
+    ctx.fillStyle='#cfd6de'; ctx.beginPath(); ctx.moveTo(-26,0); ctx.lineTo(-19,-5); ctx.lineTo(-15,0); ctx.lineTo(-19,5); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+function drawWindFlag(){
+  const px=clamp(pot.baseX+pot.w*0.72, 26, W-26), gy=groundY(), topY=gy-pot.h-58;
+  ctx.save();
+  ctx.strokeStyle='#6a4e2a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(px,gy); ctx.lineTo(px,topY); ctx.stroke();
+  ctx.fillStyle='#caa15a'; ctx.beginPath(); ctx.arc(px,topY,4,0,Math.PI*2); ctx.fill();
+  const dir = wind>1?1 : wind<-1?-1 : 0;
+  const strength = Math.min(1, Math.abs(wind)/200);
+  const len = 28 + strength*26, wave=Math.sin(gt*(6+strength*8))*3*(strength+0.2);
+  ctx.fillStyle = dir===0 ? '#9aa6b0' : (dir>0?'#ff8a5c':'#5cb8ff');
+  ctx.beginPath(); ctx.moveTo(px,topY+2);
+  if(dir===0){ ctx.lineTo(px+6,topY+22); ctx.lineTo(px-2,topY+20); }
+  else { const L=px+dir*len; ctx.quadraticCurveTo(px+dir*len*0.5,topY-6+wave,L,topY+2); ctx.quadraticCurveTo(px+dir*len*0.5,topY+14+wave,px,topY+16); }
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function drawArrowShape(x,y,ang,sc){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang); sc=sc||1;
+  ctx.strokeStyle='#caa15a'; ctx.lineWidth=4*sc; ctx.beginPath(); ctx.moveTo(-26*sc,0); ctx.lineTo(16*sc,0); ctx.stroke();
+  ctx.fillStyle='#e8534e'; ctx.beginPath(); ctx.moveTo(16*sc,0); ctx.lineTo(8*sc,-5*sc); ctx.lineTo(8*sc,5*sc); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#e9edf2'; ctx.beginPath(); ctx.moveTo(-26*sc,0); ctx.lineTo(-18*sc,-6*sc); ctx.lineTo(-14*sc,0); ctx.lineTo(-18*sc,6*sc); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawAimGuides(){
+  // 첫 층 시범 궤적 — 들어가는 길과 세기를 한 번 보여 준다 (demoOn 주석 참조)
+  const demo = demoOn() ? demoShot() : null;
+  if(demo){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,226,150,.45)'; ctx.lineWidth=2.5; ctx.lineCap='round';
+    ctx.setLineDash([2,9]); ctx.lineDashOffset=-(demoT*40)%11;
+    ctx.beginPath();
+    for(let i=0;i<demo.pts.length;i++){ const q=demo.pts[i]; i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y); }
+    ctx.stroke(); ctx.setLineDash([]); ctx.lineCap='butt';
+    // 유령 화살은 실제 체공 시간대로 지나간다. 이 연출의 목적은 경로보다 '세기'다 —
+    // 0.4초에 저 거리를 가로지르는 걸 보면 손이 얼마나 빨라야 하는지 몸으로 안다.
+    const cyc=demo.flight+0.6, ph=demoT%cyc;
+    if(ph<demo.flight){
+      const fi=ph*36, i0=Math.max(0,Math.min(demo.pts.length-2,Math.floor(fi))), f=fi-i0;
+      const p0=demo.pts[i0], p1=demo.pts[i0+1];
+      ctx.globalAlpha=0.85*Math.min(1,(demo.flight-ph)/0.10);
+      drawArrowShape(p0.x+(p1.x-p0.x)*f, p0.y+(p1.y-p0.y)*f, Math.atan2(p1.y-p0.y,p1.x-p0.x), 0.8);
+    }
+    ctx.restore();
+  }
+  // 당기는 중에만 궤적이 보인다. '이상 궤적 점선'과 '목표 눈금'은 없앴다 —
+  // 정답을 보여 주면 플레이가 눈금 맞추기가 된다. 궤적은 지금 내가 당긴 상태일 뿐이다.
+  // 바람은 반영하지 않는다. 깃발과 직전 발 자국을 읽어 미리 겨누는 것이 이 게임의 실력이다.
+  // 예측 궤적은 그리지 않는다. 감각으로 던지는 놀이에 정답선을 깔면 다시 계산 게임이 된다.
+  // 대신 손이 지나간 자리만 잠깐 남겨 '얼마나 휘둘렀는지'를 몸으로 느끼게 한다.
+  if(dragging && samples.length>1){
+    ctx.strokeStyle='rgba(255,235,150,.45)'; ctx.lineWidth=3; ctx.lineCap='round';
+    ctx.beginPath();
+    for(let i=0;i<samples.length;i++){ const q=samples[i]; i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y); }
+    ctx.stroke(); ctx.lineCap='butt';
+  }
+  // 흔들 항아리: 화살이 도착할 때의 입구 위치
+  if(mod.sway){
+    const tx=targetX();
+    ctx.strokeStyle='rgba(180,255,200,.9)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(tx-6,pot.rimY-16); ctx.lineTo(tx,pot.rimY-8); ctx.lineTo(tx+6,pot.rimY-16); ctx.stroke();
+  }
+  // 최근 빗나간 발들이 입구면을 지난 자리 — 최신이 가장 진하다
+  for(let i=0;i<crosses.length;i++){
+    const x=crosses[i], fresh=(i+1)/crosses.length, a=0.25+fresh*0.55;
+    ctx.strokeStyle='rgba(255,140,140,'+a.toFixed(2)+')'; ctx.lineWidth=fresh>0.99?2.5:1.5;
+    ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(x,pot.rimY-26); ctx.lineTo(x,pot.rimY+4); ctx.stroke(); ctx.setLineDash([]);
+    if(fresh>0.99){
+      ctx.fillStyle='rgba(255,140,140,.95)'; ctx.font='bold 10px system-ui'; ctx.textAlign='center';
+      ctx.fillText('직전 발 '+(crosses[i]>pot.x?'+':'')+Math.round(crosses[i]-pot.x), x, pot.rimY-30);
+    }
+  }
+  // 구역 조준 표식 — 관/귀를 '노릴 수 있다'는 걸 보여 준다
+  {
+    const r=Math.max(7,pot.earW*0.42);
+    for(const [ox,big] of [[0,true],[-pot.earOff,false],[pot.earOff,false]]){
+      const rr2=(big?r*1.3:r)*2.2;
+      if(ART.ret){
+        ctx.save(); ctx.globalAlpha=big?0.95:0.75;
+        ctx.drawImage(ART.ret, pot.x+ox-rr2/2, pot.rimY-rr2/2, rr2, rr2);
+        ctx.restore();
+      } else {
+        ctx.strokeStyle=big?'rgba(255,225,77,.75)':'rgba(159,208,255,.7)';
+        ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(pot.x+ox,pot.rimY,big?r*1.3:r,0,Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(pot.x+ox,pot.rimY,1.6,0,Math.PI*2);
+        ctx.fillStyle=big?'rgba(255,225,77,.9)':'rgba(159,208,255,.85)'; ctx.fill();
+      }
+    }
+  }
+  // 당김 링 + 조준 화살 — 손가락 아래가 아니라 궁사 위에서 힘이 읽히게
+  const ox=originX(), oy=originY();
+  const R=Math.min(W,H)*0.085;
+  ctx.save(); ctx.translate(ox,oy);
+  // 링은 '던진 세기'를 던진 직후에만 보여 준다 — 다음 발을 얼마나 세게 할지 가늠하는 눈금.
+  // 던지기 전에 띄우면 다시 조준 게임이 되므로 일부러 안 띄운다.
+  if(throwFlash>0.01){
+    const fa=Math.min(1,throwFlash);
+    if(ART.ring){ ctx.save(); ctx.globalAlpha=0.55*fa; ctx.drawImage(ART.ring,-R,-R,R*2,R*2); ctx.restore(); }
+    const col=aimPow>0.92?'#e8534e':aimPow>0.6?'#ffcf5c':'#aef5b0';
+    const rf=ART.ring?R*0.84:R, lw=ART.ring?R*0.26:5;
+    ctx.save(); ctx.globalAlpha=fa;
+    ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.lineCap='round';
+    ctx.beginPath(); ctx.arc(0,0,rf,-Math.PI/2,-Math.PI/2+Math.PI*2*aimPow); ctx.stroke();
+    ctx.lineCap='butt';
+    // 필요했던 세기 — 여기까지 던졌어야 했다. 다음 발을 손으로 고치는 기준점.
+    if(needPow>=0 && lastResult==='miss'){
+      const na=-Math.PI/2+Math.PI*2*needPow;
+      ctx.strokeStyle='rgba(255,255,255,.95)'; ctx.lineWidth=3;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(na)*(rf-lw*0.75), Math.sin(na)*(rf-lw*0.75));
+      ctx.lineTo(Math.cos(na)*(rf+lw*0.75), Math.sin(na)*(rf+lw*0.75));
+      ctx.stroke();
+    }
+    ctx.restore();
+  } else if(demo){
+    // 시범 세기 — 점선이 보여 준 '이 정도'를 손 쪽 눈금으로 한 번 더 말해 준다.
+    // 1층 첫 성공 전까지만이므로 조준 게임으로 돌아가지는 않는다.
+    const pulse=0.55+0.25*Math.sin(gt*2.6);
+    if(ART.ring){ ctx.save(); ctx.globalAlpha=0.2+0.4*pulse; ctx.drawImage(ART.ring,-R,-R,R*2,R*2); ctx.restore(); }
+    const rf=ART.ring?R*0.84:R, lw=ART.ring?R*0.26:5;
+    ctx.save(); ctx.globalAlpha=0.5+0.3*pulse;
+    ctx.strokeStyle='rgba(255,226,150,.95)'; ctx.lineWidth=lw; ctx.lineCap='round';
+    ctx.beginPath(); ctx.arc(0,0,rf,-Math.PI/2,-Math.PI/2+Math.PI*2*demo.pow); ctx.stroke();
+    ctx.restore(); ctx.lineCap='butt';
+  }
+  // 손에 든 화살 — 손이 향하는 쪽으로만 돈다 (궤적 예측 아님)
+  { const ang=Math.atan2(aimUY,aimUX);
+    ctx.save(); ctx.rotate(ang); ctx.globalAlpha=dragging?0.95:0.7;
+    drawArrowShape(R*0.55,0,0,1.0); ctx.globalAlpha=1; ctx.restore(); }
+  ctx.restore();
+  if(throwFlash>0.01){
+    ctx.save(); ctx.globalAlpha=Math.min(1,throwFlash);
+    ctx.fillStyle='#ffe6b0'; ctx.font='bold 12px system-ui'; ctx.textAlign='center';
+    ctx.fillText('던진 세기 '+Math.round(aimPow*100)+'%', ox, oy+R+20);
+    ctx.restore();
+  }
+  // 시범 세기에는 숫자를 붙이지 않는다. 손으로 %를 맞출 수는 없으므로 숫자는
+  // 가르치는 데 쓸모가 없고, 1층 필요 세기는 12% 라 오히려 "약하게?" 로 읽힌다.
+  // 가르치는 몫은 점선·유령 화살·금색 링이 한다.
+  // 첫 판 첫 발에만 "당겼다 놓으세요" 손 안내
+  if(ART.hand && stage===1 && arrowsLeft===arrowsTotal && !dragging && throwFlash<0.01){
+    const hs=Math.min(W,H)*0.22, t=0.55+0.45*Math.sin(gt*2.2);
+    ctx.save(); ctx.globalAlpha=0.5+0.35*t;
+    ctx.drawImage(ART.hand, ox-hs*0.15, oy+R*0.3, hs, hs);
+    ctx.restore();
+  }
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+  const gy=padY();
+  // ── 하늘: 올라갈수록 짙어진다 ──
+  const alt=Math.min(1,(stage-1)/24);
+  if(ART.sky){
+    // 128×4096 띠. 고도가 오를수록 위쪽 구간을 보여준다(가로로 화면 폭까지 늘림).
+    const ih=ART.sky.height, win=ih*0.22, sy=(1-alt)*(ih-win);
+    ctx.drawImage(ART.sky, 0, sy, ART.sky.width, win, 0, 0, W, H);
+  } else {
+    const sky=ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,mix('#24405e','#0b1430',alt));
+    sky.addColorStop(.55,mix('#4a6a7e','#24405e',alt));
+    sky.addColorStop(1,mix('#caa36e','#4a6a7e',alt));
+    ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+  }
+  // 별 — 고도가 오르면 드러난다
+  const starA=alt*0.7;
+  if(starA>0.04){
+    if(ART.star){
+      const tw=ART.star.width, th=ART.star.height;
+      const oy=((climbed*0.25)%th+th)%th;
+      ctx.save(); ctx.globalAlpha=starA;
+      for(let y=oy-th; y<H; y+=th) for(let x=0; x<W; x+=tw) ctx.drawImage(ART.star,x,y);
+      ctx.restore();
+    } else {
+      ctx.fillStyle='#fff';
+      for(let i=0;i<34;i++){ const bx=(i*149)%W, by=(i*83)%Math.max(1,H*0.55);
+        ctx.globalAlpha=starA*(0.5+0.5*Math.sin(gt*2+i)); ctx.fillRect(bx,by,2,2); }
+      ctx.globalAlpha=1;
+    }
+  }
+  // 해 / 달 — 고도가 오르면 아래로 내려간다(올라왔다는 신호)
+  ctx.save(); const sx=W*0.80, syy=H*(0.18+alt*0.45), R=24-alt*6;
+  const sg=ctx.createRadialGradient(sx,syy,4,sx,syy,64);
+  sg.addColorStop(0,'rgba(255,238,200,'+(0.85-alt*0.2).toFixed(2)+')');
+  sg.addColorStop(1,'rgba(255,238,200,0)');
+  ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sx,syy,64,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=mix('#ffe9b8','#e7f0ff',alt); ctx.beginPath(); ctx.arc(sx,syy,R,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  // 구름 — 바람 방향으로 흐르고, 올라갈수록 발 아래로 내려간다
+  { const cd=gt*(6+wind*0.05), cy=H*(0.30+alt*0.42);
+    if(ART.cloud){
+      const cw=W*1.1, chh=cw*ART.cloud.height/ART.cloud.width;
+      const ox=((-cd)%cw+cw)%cw;
+      ctx.save(); ctx.globalAlpha=0.75-alt*0.35;
+      for(let x=ox-cw; x<W+cw; x+=cw) ctx.drawImage(ART.cloud,x,cy-chh/2,cw,chh);
+      ctx.restore();
+    } else {
+      ctx.fillStyle='rgba(255,255,255,'+(0.16-alt*0.07).toFixed(2)+')';
+      for(let i=0;i<4;i++){ const cx=((i*150+cd)%(W+200)+W+200)%(W+200)-100, cyy=cy+i*34;
+        ctx.beginPath(); ctx.ellipse(cx,cyy,40,12,0,0,Math.PI*2);
+        ctx.ellipse(cx+30,cyy+5,28,10,0,0,Math.PI*2); ctx.fill(); }
+    } }
+
+  ctx.save();
+  if(camY) ctx.translate(0,camY);     // 층 전환 — 세계가 아래로 흐른다
+  if(shake>0) ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+  // ── 누각 기둥 (세로 타일, 낮은 대비의 배경) ──
+  { const cw=colW(), chh=cw*COL_AR, x=W/2-cw/2;
+    const off=((climbed+camY)%chh+chh)%chh;
+    ctx.save(); ctx.globalAlpha=0.9;
+    for(let y=off-chh; y<H+chh; y+=chh){
+      if(ART.col) ctx.drawImage(ART.col,x,y,cw,chh);
+      else { ctx.fillStyle='#513520'; ctx.fillRect(x,y,cw,chh);
+             ctx.fillStyle='#7a5331'; ctx.fillRect(x,y,cw*0.16,chh); ctx.fillRect(x+cw*0.84,y,cw*0.16,chh);
+             ctx.fillStyle='#a8763f'; ctx.fillRect(x,y+chh*0.24,cw,10); ctx.fillRect(x,y+chh*0.74,cw,10); }
+    }
+    ctx.restore(); }
+
+  // ── 층 발판: 지나온 층(아래) → 현재 층 → 목표 층 ──
+  { const out=dir();                       // 목표 층이 뻗는 방향
+    let y=padY()+riseFor(Math.max(1,stage-1)), o=-out;
+    for(let k=0;k<3 && y<H+60;k++){        // 지나온 층들
+      drawTier(y,o,0.30-k*0.08); y+=riseFor(Math.max(1,stage-2-k)); o=-o; }
+    drawTier(padY(),-out,1);               // 현재 층 (발사대)
+    drawTier(tierY(stage),out,1); }        // 목표 층 (항아리)
+
+  // 발사대 표시 — 어디서 쏘는지 한눈에
+  { const mx=originX(), gy2=padY();
+    ctx.fillStyle='rgba(255,207,92,.9)'; rr(mx-22,gy2-5,44,6,3); ctx.fill();
+    ctx.strokeStyle='rgba(255,207,92,.35)'; ctx.lineWidth=2; ctx.setLineDash([4,5]);
+    ctx.beginPath(); ctx.moveTo(mx,gy2-5); ctx.lineTo(mx,gy2-26); ctx.stroke(); ctx.setLineDash([]); }
+
+  drawGroundArrows();
+  drawPot();
+  drawStuckArrows();
+  drawWindFlag();
+
+  if(state==='aim') drawAimGuides();
+
+  // 궤적
+  if(trail.length){ ctx.strokeStyle='rgba(255,230,150,.5)'; ctx.lineWidth=3; ctx.beginPath(); trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke(); }
+  // 비행 중 + 빗나간 직후(튕긴 자리에 멈춰 보여줌)
+  if(arrow && (state==='fly' || (state==='result' && lastResult==='miss' && !arrow.landed))) drawArrowShape(arrow.x,arrow.y,arrow.ang,1);
+
+  // 파티클
+  for(const p of parts){ ctx.globalAlpha=Math.max(0,Math.min(1,p.life*1.4)); ctx.fillStyle=p.c||'#ffcf5c'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
+  ctx.globalAlpha=1;
+  ctx.restore();
+
+  // 고도 비네트 — 밤 변주를 없앤 대신, 높이 오를수록 가장자리가 은은히 어두워진다.
+  // 조준을 가리지 않도록 중앙은 손대지 않고 최대 30% 까지만.
+  { const alt2=Math.min(1,(stage-1)/24);
+    if(alt2>0.05){
+      const vg=ctx.createRadialGradient(W/2,H*0.55,Math.min(W,H)*0.35,W/2,H*0.55,Math.max(W,H)*0.78);
+      vg.addColorStop(0,'rgba(6,10,24,0)'); vg.addColorStop(1,'rgba(6,10,24,'+(alt2*0.30).toFixed(2)+')');
+      ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+    } }
+  // 슬로우모션 연출
+  if(slowT>0){
+    ctx.fillStyle='rgba(255,240,180,.06)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,225,77,.9)'; ctx.font='bold 13px system-ui'; ctx.textAlign='center';
+    ctx.fillText('…한 끗…', W/2, H*0.30);
+  }
+  // 파워 게이지는 없앴다 — 힘은 궁사 주위의 당김 링으로 읽는다
+  // 플래시
+  if(flash>0){ ctx.fillStyle='rgba(255,245,200,'+(flash*0.45)+')'; ctx.fillRect(0,0,W,H); }
+  // 일시정지
+  if(paused){ ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#ffe6b0'; ctx.font='bold 30px system-ui'; ctx.textAlign='center'; ctx.fillText('⏸ 일시정지',W/2,H*0.46);
+    ctx.font='14px system-ui'; ctx.fillStyle='#caa15a'; ctx.fillText('▶ 버튼을 눌러 계속',W/2,H*0.46+30);
+    const got=ACH.filter(a=>meta.ach[a.id]).length;
+    ctx.fillText('업적 '+got+'/'+ACH.length+' · 최고 '+meta.bestStage+'단계 · 누적 '+meta.totalIn+'발 적중',W/2,H*0.46+58); }
+}
+
+// ---- loop ----
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(state==='start'){ lastTs=ts; return; }
+  if(state==='over'||paused){ lastTs=ts; render(); return; }
+  let dt=(ts-lastTs)/1000; lastTs=ts; if(dt>0.05)dt=0.05; if(dt<0)dt=0;
+  if(slowT>0){ slowT-=dt; dt*=0.34; }
+  update(dt); render();
+}
+requestAnimationFrame(loop);
+
+// ---- input ----
+function ptr(e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault(); initAudio();
+  if(paused||state==='over'||state==='clear'){ return; }
+  if(state!=='aim'){ tap(); return; }
+  const p=ptr(e); dragging=true; dragCX=p.x; dragCY=p.y;
+  samples=[{x:p.x,y:p.y,t:performance.now()}];
+  try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+});
+cv.addEventListener('pointermove',e=>{
+  if(!dragging) return; e.preventDefault();
+  const p=ptr(e); dragCX=p.x; dragCY=p.y;
+  samples.push({x:p.x,y:p.y,t:performance.now()});
+  if(samples.length>24) samples.shift();
+  // 손이 향하는 쪽으로 화살만 돌려 준다. 궤적 예측은 없다 — 감각으로 던지는 놀이다.
+  const v=releaseVelocity();
+  if(v){ const n=Math.hypot(v.vx,v.vy); aimUX=v.vx/n; aimUY=Math.min(-0.08,v.vy/n); angle=aimAngle(); }
+});
+function endDrag(e){
+  if(!dragging) return; if(e) e.preventDefault();
+  dragging=false;
+  const v=releaseVelocity(); samples=[];
+  if(!v) return;                                   // 느린 손짓은 던지기가 아니다
+  let ux=v.vx/v.sp, uy=v.vy/v.sp;
+  if(uy>-0.08){ uy=-0.08; const n=Math.hypot(ux,uy); ux/=n; uy/=n; }   // 아래로는 못 던진다
+  aimUX=ux; aimUY=uy; angle=aimAngle();
+  aimSpeed=swipeToSpeed(v.sp);
+  aimPow=clamp((v.sp/H-SWIPE_LO)/(SWIPE_HI-SWIPE_LO),0,1);
+  sfx.lock(); launch();
+}
+cv.addEventListener('pointerup',endDrag);
+cv.addEventListener('pointercancel',endDrag);
+cv.addEventListener('pointerleave',endDrag);
+addEventListener('keydown',e=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); if(state==='start')startGame('endless'); else tap(); } });
+function tryLockPortrait(){ try{ if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('portrait').catch(()=>{}); }catch(e){} }
+function startGame(m){
+  migrateLegacy();   // v0.6 기록을 따로 보관하고 새 기록을 연다
+  initAudio(); tryLockPortrait();
+  mode = m==='daily' ? 'daily' : 'endless';
+  if(mode==='daily'){ rollDaily(); rngState=seedFrom('tuho-'+daily.date); }
+  score=0; combo=0; stage=1; paused=false; continuedThisRun=false;
+  runStats={gwan:0,ear:0,teeter:0,in:0};
+  setupStage.prev='';        // 변주 순서도 시드에 포함된다 — 이전 판의 잔재가 남으면 재현이 깨진다
+  parts=[]; toastQ=[]; $('pauseBtn').textContent='⏸';
+  $('start').classList.add('hidden'); $('over').classList.add('hidden');
+  $('ver').textContent = mode==='daily'
+    ? ('📅 오늘의 도전 '+daily.date+' · 오늘 최고 '+daily.best+'점')
+    : VER_TEXT;
+  setupStage(); newArrow(); setTop(); lastTs=performance.now();
+}
+function paintStartScreen(){
+  const d=dailyView();
+  $('startRec').textContent='최고 '+best+'점 · 최고 '+meta.bestStage+'층 · 업적 '+ACH.filter(a=>meta.ach[a.id]).length+'/'+ACH.length
+    + ((meta.legacyBest||meta.legacyStage) ? '   (v0.6 기록 '+meta.legacyBest+'점 · '+meta.legacyStage+'단계)' : '');
+  $('dailyRec').textContent = d.plays
+    ? ('오늘 '+d.best+'점 · '+d.stage+'층 · '+d.plays+'번 시도'+(d.streak>1?' · 🔥'+d.streak+'일 연속':''))
+    : ('매일 바뀌는 같은 판으로 겨뤄요'+(d.streak>0?' · 🔥'+d.streak+'일 연속':''));
+}
+function shareText(){
+  const d=dailyView();
+  return mode==='daily'
+    ? ('🏹 모두의 화살촉 · 오늘의 도전 '+d.date+'\n'+d.stage+'층 · '+d.best+'점'
+       +(d.streak>1?' · 🔥'+d.streak+'일 연속':'')+'\n같은 판으로 겨뤄봐요!')
+    : ('🏹 모두의 화살촉\n'+stage+'층 · '+score+'점 (최고 '+best+')\n투호 한 판 어때요?');
+}
+
+// ---- 공유 이미지 카드 ----
+// 1080×1350(4:5) — 인스타·카톡에 그대로 올라가는 비율.
+// 게임과 같은 팔레트·같은 항아리로 그려서, 카드 한 장만 봐도 무슨 게임인지 읽히게 한다.
+function makeCard(){
+  const CW=1080, CH=1350, cx=CW/2, gy=CH*0.70;
+  const cvs=document.createElement('canvas'); cvs.width=CW; cvs.height=CH;
+  const g=cvs.getContext('2d');
+  const F=(s,w)=>g.font=(w||800)+' '+s+'px "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif';
+  const RR=(x,y,w,h,r)=>{ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); };
+  const isD = mode==='daily', d = dailyView();
+  const sc = isD ? d.best : score, st = isD ? d.stage : stage;
+
+  // 하늘 · 해 · 산 · 땅 (게임 배경과 동일한 색)
+  let sky=g.createLinearGradient(0,0,0,gy);
+  sky.addColorStop(0,'#24405e'); sky.addColorStop(.55,'#4a6a7e'); sky.addColorStop(1,'#caa36e');
+  g.fillStyle=sky; g.fillRect(0,0,CW,gy);
+  const sg=g.createRadialGradient(CW*0.80,gy*0.30,10,CW*0.80,gy*0.30,200);
+  sg.addColorStop(0,'rgba(255,238,200,.9)'); sg.addColorStop(1,'rgba(255,238,200,0)');
+  g.fillStyle=sg; g.fillRect(CW*0.80-200,gy*0.30-200,400,400);
+  g.fillStyle='#ffe9b8'; g.beginPath(); g.arc(CW*0.80,gy*0.30,60,0,Math.PI*2); g.fill();
+  const hill=(baseY,amp,col)=>{ g.fillStyle=col; g.beginPath(); g.moveTo(0,gy); g.lineTo(0,baseY);
+    for(let x=0;x<=CW;x+=CW/6) g.lineTo(x,baseY-Math.sin(x/CW*Math.PI*1.4+baseY)*amp); g.lineTo(CW,gy); g.closePath(); g.fill(); };
+  hill(gy-130,80,'rgba(60,78,96,.6)'); hill(gy-58,60,'rgba(74,90,78,.7)');
+  const gg=g.createLinearGradient(0,gy,0,CH); gg.addColorStop(0,'#7a5832'); gg.addColorStop(1,'#43301c');
+  g.fillStyle=gg; g.fillRect(0,gy,CW,CH-gy);
+  g.strokeStyle='rgba(255,230,180,.22)'; g.lineWidth=4; g.beginPath(); g.moveTo(0,gy); g.lineTo(CW,gy); g.stroke();
+
+  // 누각 — 올라온 층이 아래로 이어진다
+  { const cw=CW*0.26, cx0=cx-cw/2;
+    g.fillStyle='#513520'; g.fillRect(cx0,CH*0.30,cw,gy-CH*0.30);
+    g.fillStyle='#7a5331'; g.fillRect(cx0,CH*0.30,cw*0.16,gy-CH*0.30); g.fillRect(cx0+cw*0.84,CH*0.30,cw*0.16,gy-CH*0.30);
+    let ty=gy, o=1;
+    for(let k=0;k<4;k++){                       // 지나온 층들
+      const tw=CW*0.26, x=o>0?cx+cw/2:cx-cw/2-tw;
+      g.globalAlpha=0.30+k*0.0;
+      g.fillStyle='#9aa0a0'; g.fillRect(x,ty,tw,10);
+      g.fillStyle='#4a5a64'; g.fillRect(x,ty+10,tw,8);
+      g.globalAlpha=1; ty-=CH*0.075; o=-o;
+    }
+  }
+  // 항아리 (게임과 같은 비율: 귀 = 입구×0.30, 오프셋 ×0.75)
+  const m=186, pw=352, ph=250, ry=gy-ph, ew=m*0.30, eo=m*0.75;
+  g.fillStyle='rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(cx,gy+8,pw*0.42,16,0,0,Math.PI*2); g.fill();
+  const pot=(x,w)=>{ const lg=g.createLinearGradient(x-w/2,0,x+w/2,0);
+    lg.addColorStop(0,'#6b4a2a'); lg.addColorStop(.5,'#9c6c3c'); lg.addColorStop(1,'#5a3e22'); return lg; };
+  for(const s of [-1,1]){ const ex=cx+s*eo; g.fillStyle=pot(ex,ew*1.2); RR(ex-ew/2-4,ry,ew+8,ew*1.6,ew*0.35); g.fill();
+    g.fillStyle='#241607'; g.beginPath(); g.ellipse(ex,ry,ew/2,ew*0.24,0,0,Math.PI*2); g.fill(); }
+  g.fillStyle=pot(cx,pw); g.beginPath();
+  g.moveTo(cx-m/2,ry);
+  g.bezierCurveTo(cx-pw/2,ry+ph*0.22, cx-pw/2,ry+ph*0.72, cx-pw*0.30,ry+ph);
+  g.lineTo(cx+pw*0.30,ry+ph);
+  g.bezierCurveTo(cx+pw/2,ry+ph*0.72, cx+pw/2,ry+ph*0.22, cx+m/2,ry);
+  g.closePath(); g.fill();
+  g.fillStyle='#241607'; g.beginPath(); g.ellipse(cx,ry,m/2,m*0.18,0,0,Math.PI*2); g.fill();
+  g.strokeStyle='rgba(0,0,0,.18)'; g.lineWidth=8; g.beginPath(); g.moveTo(cx-pw*0.42,ry+ph*0.5); g.lineTo(cx+pw*0.42,ry+ph*0.5); g.stroke();
+  // 꽂힌 화살 — 이번 판에 넣은 수만큼 (최대 7)
+  const hits=Math.min(7,(runStats.gwan||0)+(runStats.ear||0)+(runStats.teeter||0)+(runStats.in||0));
+  for(let i=0;i<hits;i++){
+    const t=hits===1?0:(i/(hits-1)-0.5), ax=cx+t*m*0.62, tilt=t*0.3;
+    g.save(); g.translate(ax,ry+6); g.rotate(tilt);
+    g.strokeStyle='#caa15a'; g.lineWidth=9; g.beginPath(); g.moveTo(0,0); g.lineTo(0,-130); g.stroke();
+    g.fillStyle=(i===0&&runStats.gwan)?'#ffe14d':'#e9edf2';
+    g.beginPath(); g.moveTo(0,-130); g.lineTo(-16,-108); g.lineTo(0,-116); g.lineTo(16,-108); g.closePath(); g.fill();
+    g.restore();
+  }
+
+  // 글자
+  g.textAlign='center';
+  g.shadowColor='rgba(0,0,0,.45)'; g.shadowBlur=14; g.shadowOffsetY=4;
+  F(62,900); g.fillStyle='#ffcf5c'; g.fillText('🏹 모두의 화살촉',cx,132);
+  g.shadowBlur=8;
+  F(34,800); g.fillStyle='#ffe6b0';
+  g.fillText(isD ? ('📅 오늘의 도전 · '+d.date) : '끝없는 도전', cx, 206);
+  // 큰 숫자가 '이번 판'인지 '오늘 최고'인지 라벨로 분명히 한다
+  F(32,800); g.fillStyle='rgba(255,230,176,.85)'; g.fillText(isD?'오늘 최고':'점수', cx, 300);
+  F(168,900); g.fillStyle='#fff'; g.fillText(sc.toLocaleString(), cx, 460);
+  F(44,800); g.fillStyle='#ffe14d'; g.fillText(st+'층 도달', cx, 530);
+  // 구역별 적중
+  const parts2=[];
+  if(runStats.gwan) parts2.push('관 '+runStats.gwan);
+  if(runStats.ear) parts2.push('귀 '+runStats.ear);
+  if(runStats.teeter) parts2.push('한 끗 '+runStats.teeter);
+  if(runStats.in) parts2.push('들어감 '+runStats.in);
+  F(38,800); g.fillStyle='#ffe6b0';
+  g.fillText(parts2.length?parts2.join('  ·  '):'다음 판엔 더 멀리!', cx, 1058);
+  if(isD && d.streak>1){ F(34,800); g.fillStyle='#ff9a4a'; g.fillText('🔥 '+d.streak+'일 연속 도전', cx, 1118); }
+  g.shadowBlur=0; g.shadowOffsetY=0;
+  F(28,700); g.fillStyle='rgba(255,230,176,.72)';
+  g.fillText('seungiljang.github.io/games/tuho.html', cx, CH-52);
+  return cvs;
+}
+function cardBlob(){ return new Promise(res=>makeCard().toBlob(res,'image/png')); }
+/** 이미지 공유 → 실패하면 다운로드 → 그것도 안 되면 문구 복사. 단계마다 떨어뜨린다. */
+async function shareCard(btn){
+  const say=t=>{ if(btn) btn.textContent=t; };
+  try{
+    const blob=await cardBlob();
+    if(!blob) throw new Error('blob 생성 실패');
+    const file=new File([blob],'모두의화살촉.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],text:shareText()}); say('✅ 공유함'); return;
+    }
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='모두의화살촉.png'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    say('✅ 이미지 저장됨');
+  }catch(err){
+    if(err && err.name==='AbortError'){ say('📤 결과 공유'); return; }   // 사용자가 공유창을 닫음
+    try{ await navigator.clipboard.writeText(shareText()); say('✅ 문구 복사됨'); }
+    catch(e2){
+      try{ const ta=document.createElement('textarea'); ta.value=shareText(); ta.style.cssText='position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); say('✅ 문구 복사됨'); }
+      catch(e3){ say('공유 실패'); }
+    }
+  }
+}
+$('startBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); startGame('endless'); });
+$('dailyBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); startGame('daily'); });
+$('overBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); if(interCount%3===0) showInterstitial(); startGame(mode); });
+$('backBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation();
+  state='start'; mode='endless'; $('ver').textContent=VER_TEXT;
+  $('over').classList.add('hidden'); paintStartScreen(); $('start').classList.remove('hidden'); });
+$('shareBtn').addEventListener('pointerdown',async e=>{
+  e.preventDefault(); e.stopPropagation();
+  const b=$('shareBtn'); b.style.pointerEvents='none'; b.textContent='⏳ 카드 만드는 중…';
+  await shareCard(b);
+  b.style.pointerEvents='auto';
+  setTimeout(()=>{ if($('shareBtn')) $('shareBtn').textContent='📤 결과 공유'; },1800);
+});
+$('continueBtn').addEventListener('pointerdown',async e=>{
+  e.preventDefault(); e.stopPropagation();
+  const b=$('continueBtn'); b.style.pointerEvents='none'; b.textContent='⏳ 광고 보는 중…';
+  const ok=await showRewarded();
+  b.style.pointerEvents='auto'; b.textContent='📺 광고 보고 이어하기 (화살 +3)';
+  if(ok){ continuedThisRun=true; arrowsLeft=3; $('over').classList.add('hidden'); newArrow(); setTop(); lastTs=performance.now(); }
+});
+$('pauseBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); if(state==='start'||state==='over')return; paused=!paused; $('pauseBtn').textContent=paused?'▶':'⏸'; if(!paused)lastTs=performance.now(); });
+$('muteBtn').addEventListener('pointerdown',e=>{ e.preventDefault(); e.stopPropagation(); muted=!muted; $('muteBtn').textContent=muted?'🔇':'🔊'; });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && state!=='start' && state!=='over'){ paused=true; $('pauseBtn').textContent='▶'; } });
+
+// 시작 화면 기록
+paintStartScreen();
+$('shareBtn').style.display='none';
+setupStage(); setTop(); render();
+</script>
+</body></html>
