@@ -1,8 +1,9 @@
-// 세로 등반 프로토타입 지오메트리 검증
-//   node tools/harness-vertical.js proto/vertical.html
-// 렌더링을 재작성하기 전에 좌표계·방향·각도 상한이 맞는지 먼저 못박아 두는 용도.
+// 모두의 화살촉 — 헤드리스 검증 하네스
+//   node tools/harness.js index.html
+// DOM·캔버스를 스텁해 게임 스크립트를 그대로 구동한다. 지오메트리·난이도·손감각·
+// 보상 계층·일일 도전·공유 카드·광고 중단 스위치까지 한 파일에서 본다.
 const fs=require('fs'), vm=require('vm');
-const HTML=process.argv[2]||'proto/vertical.html';
+const HTML=process.argv[2]||'index.html';
 const src=fs.readFileSync(HTML,'utf8');
 const code=src.match(/<script>([\s\S]*)<\/script>/)[1];
 
@@ -12,22 +13,8 @@ function makeCtx(){ const g={addColorStop:noop};
     if(k==='createLinearGradient'||k==='createRadialGradient')return()=>g;
     if(k==='measureText')return()=>({width:10});
     if(k in t)return t[k]; return noop; }, set(t,k,v){t[k]=v;return true;}}); }
-const els={};
-function el(id){ if(!els[id])els[id]={id,textContent:'',innerHTML:'',className:'',style:{},_c:new Set(),
-  classList:{add(c){els[id]._c.add(c)},remove(c){els[id]._c.delete(c)},contains(c){return els[id]._c.has(c)}},
-  addEventListener:noop,getContext:makeCtx,width:0,height:0}; return els[id]; }
-const store={};
-const sandbox={ console, innerWidth:375, innerHeight:812, devicePixelRatio:2,
-  addEventListener:noop, requestAnimationFrame:noop,
-  document:{ getElementById:el, addEventListener:noop,
-    createElement:()=>({style:{},getContext:makeCtx,toBlob:cb=>cb({}),click:noop,select:noop,remove:noop,appendChild:noop}),
-    body:{classList:{add:noop,remove:noop},appendChild:noop} },
-  localStorage:{getItem:k=>k in store?store[k]:null,setItem:(k,v)=>{store[k]=String(v)}},
-  navigator:{vibrate:noop}, performance:{now:()=>0}, screen:{}, setTimeout:noop,
-  Math,JSON,parseInt,parseFloat,isNaN };
-sandbox.window=sandbox;
-const ctx=vm.createContext(sandbox);
-vm.runInContext(code+`;globalThis.__a={
+
+const EXPORTS=`;globalThis.__a={
   get state(){return state},set state(v){state=v},
   get stage(){return stage},set stage(v){stage=v},
   get angle(){return angle},set angle(v){angle=v},
@@ -51,8 +38,34 @@ vm.runInContext(code+`;globalThis.__a={
   rollDaily,dailyView,seedFrom,todayKey,prevKey,shareText,makeCard,paintStartScreen,
   ACH,MARKS,nextMark,markAt,HAND_GRADES,HAND_MIN,HAND_N,handGrade,recordThrow,unlock,
   get brokeRecord(){return brokeRecord},get perfectRun(){return perfectRun},
-  get aimPow(){return aimPow},get aimSpeed(){return aimSpeed},get needPow(){return needPow},get lastZone(){return lastZone},get dragging(){return dragging} };`, ctx, {filename:'proto.js'});
-const A=sandbox.__a;
+  get aimPow(){return aimPow},get aimSpeed(){return aimSpeed},get needPow(){return needPow},get lastZone(){return lastZone},get dragging(){return dragging} };`;
+
+/** 게임을 한 벌 띄운다. store 를 넘기면 그 localStorage 를 그대로 물려받으므로
+ *  **앱을 다시 켠 상황**을 만들 수 있다 — 기록이 진짜 남았는지는 그래야 확인된다. */
+function boot(store, w, h){
+  store = store || {};
+  const els={};
+  function el(id){ if(!els[id])els[id]={id,textContent:'',innerHTML:'',className:'',style:{},_c:new Set(),
+    classList:{add(c){els[id]._c.add(c)},remove(c){els[id]._c.delete(c)},contains(c){return els[id]._c.has(c)}},
+    addEventListener:noop,getContext:makeCtx,width:0,height:0}; return els[id]; }
+  const sandbox={ console, innerWidth:w||375, innerHeight:h||812, devicePixelRatio:2,
+    addEventListener:noop, requestAnimationFrame:noop,
+    document:{ getElementById:el, addEventListener:noop,
+      createElement:()=>({style:{},getContext:makeCtx,toBlob:cb=>cb({}),click:noop,select:noop,remove:noop,appendChild:noop}),
+      body:{classList:{add:noop,remove:noop},appendChild:noop} },
+    localStorage:{getItem:k=>k in store?store[k]:null,setItem:(k,v)=>{store[k]=String(v)},
+                  removeItem:k=>{delete store[k]}},
+    navigator:{vibrate:noop}, performance:{now:()=>0}, screen:{}, setTimeout:noop,
+    Math,JSON,parseInt,parseFloat,isNaN };
+  sandbox.window=sandbox;
+  const ctx=vm.createContext(sandbox);
+  vm.runInContext(code+EXPORTS, ctx, {filename:'tuho.js'});
+  return {A:sandbox.__a, els, store, sandbox};
+}
+
+const game=boot();
+const {els, store, sandbox}=game;
+const A=game.A;
 
 let fails=0, warns=0;
 const ok=(c,l,g)=>{ if(c)console.log('  ✓ '+l+(g?'  '+g:'')); else{fails++;console.log('  ✗ '+l+(g?'  '+g:''));} };
@@ -254,10 +267,38 @@ hdr('7c. 빗나감 단서 — 발판에 꽂혀 탄착군이 남는가');
 
 hdr('8b. 구 기록 보관 (v0.6 → 세로 등반)');
 {
-  store['tuho_best']='1234';
-  // meta 를 직접 건드릴 수 없으므로 startGame 이 이관을 수행하는지만 본다
-  A.startGame('endless');
-  ok(true,'startGame 에서 migrateLegacy 가 호출된다 (예외 없음)');
+  // 전에는 ok(true,'예외 없음') 뿐이었다. 그래서 이관이 **v0.7 기록까지 집어삼키는**
+  // 버그를 놓쳤다(§20 참조). 이제 세 가지 세이브를 실제로 넣어 보고 결과를 본다.
+
+  // ① 진짜 v0.6 세이브 — 판 번호가 없고 기록이 있다 → 따로 보관하고 새로 시작
+  const old=boot({tuho_best:'1234', tuho_meta:JSON.stringify({bestStage:9,totalIn:40,ach:{in1:1}})}).A;
+  old.startGame('endless');
+  ok(old.best===0 && old.meta.bestStage===1,'v0.6 기록은 0 에서 새로 시작한다',
+     'best='+old.best+' bestStage='+old.meta.bestStage);
+  ok(old.meta.legacyBest===1234 && old.meta.legacyStage===9,'구 기록은 지우지 않고 따로 보관한다',
+     'legacy '+old.meta.legacyBest+'점 '+old.meta.legacyStage+'단계');
+  ok(old.meta.ach.in1===1,'업적은 이관 대상이 아니다 (그대로 남는다)');
+
+  // ② v0.7 세이브 — 판 번호가 찍혀 있으므로 절대 건드리면 안 된다
+  const cur=boot({tuho_best:'5000', tuho_meta:JSON.stringify({v:7,bestStage:14,totalIn:80,ach:{}})}).A;
+  cur.startGame('endless');
+  ok(cur.best===5000 && cur.meta.bestStage===14,'v0.7 기록은 그대로 유지된다',
+     'best='+cur.best+' bestStage='+cur.meta.bestStage);
+  ok(!cur.meta.legacyBest,'v0.7 기록을 구 기록으로 넘기지 않는다');
+
+  // ③ 새 설치 — 이관할 것이 없고, 1회차 기록이 2회차에 삼켜지지 않도록 도장이 찍힌다
+  const fresh=boot({});
+  fresh.A.startGame('endless');
+  ok(fresh.A.meta.v===7,'새 설치에도 세이브 판 번호가 찍힌다','v='+fresh.A.meta.v);
+  ok(!fresh.A.meta.legacyBest && !fresh.A.meta.legacyStage,'새 설치에는 구 기록이 생기지 않는다');
+  // 1회차 기록을 만들고 앱을 다시 켜서 시작을 누른다 — 이게 실제로 났던 버그다
+  fresh.A.stage=11; fresh.A.score=11438; fresh.A.gameOver();
+  const again=boot(fresh.store).A;
+  again.startGame('endless');
+  ok(again.best===11438,'1회차 기록이 2회차 시작에서 살아남는다 (0 으로 초기화되지 않는다)',
+     'best='+again.best);
+  ok(!again.meta.legacyBest,'1회차 기록이 v0.6 기록으로 넘어가지 않는다',
+     'legacyBest='+again.meta.legacyBest);
 }
 
 hdr('8c. 변주 4종 — 조준을 가리는 것은 뺐다');
@@ -813,6 +854,98 @@ hdr('19. 보상 계층 — 왜 계속 던지고 싶은가');
   const climb=els.climb.innerHTML||'';
   console.log('  HUD 다음 목표: '+climb.replace(/<[^>]*>/g,''));
   ok(/\d+층/.test(climb),'HUD 에 다음 목표가 층수로 표시된다', climb.replace(/<[^>]*>/g,''));
+}
+
+hdr('20. 기록 저장 — 판이 끝나면 남고, 다시 켜도 보인다');
+{
+  // v0.7 승격 때 못 옮긴 빈칸. 옛 검사는 state='power'; power=p 라는 사라진 입력 모델에
+  // 묶여 있었다. 새 입력(setAim+launch)으로 다시 쓴다.
+  // 저장은 '썼는가' 가 아니라 **'다시 켰을 때 보이는가'** 가 진짜 검사라서, 같은
+  // localStorage 를 물린 두 번째 게임을 띄워 확인한다.
+  const G=boot({});                     // 기록이 하나도 없는 새 설치
+  const B=G.A;
+  /** 한 발 던지고 결과·층전환까지 소화한다. off 를 주면 그만큼 일부러 틀리게 던진다.
+   *  바람은 끈다 — idealPower() 는 바람 보정을 안 하므로(깃발을 읽어 미리 겨누는 것이
+   *  플레이어의 실력이다) 바람이 부는 층에서는 '정확히' 던져도 빗나간다. 여기서 재는
+   *  것은 난이도가 아니라 기록 저장이므로 그 변수를 뺀다. */
+  function playThrow(X,off){
+    if(X.state!=='aim') return;
+    X.wind=0;
+    const ip=X.idealPower();
+    const p = ip==null ? 0.5 : Math.max(0,Math.min(1,ip+(off||0)));
+    X.setAim(Math.round((X.aLo+X.aHi)/2), p); X.launch();
+    let t=0; while(X.state==='fly'&&t<8){ X.update(1/120); t+=1/120; }
+    let u=0; while(X.state==='result'&&u<3){ X.update(1/60); u+=1/60; }
+    let v=0; while(X.state==='clear'&&v<4){ X.update(1/60); v+=1/60; }
+  }
+  const throwOne=off=>playThrow(B,off);
+  ok(B.best===0 && (B.meta.bestStage||1)===1,'새 설치는 기록이 비어 있다',
+     'best='+B.best+' bestStage='+B.meta.bestStage);
+
+  B.startGame();
+  let guard=0;
+  while(B.stage<11 && B.state!=='over' && guard++<300) throwOne(0);     // 정확히 던져 올라간다
+  const climbed=B.stage, scoreAtTop=B.score;
+  console.log(`  정확히 던져 ${climbed}층까지 · ${scoreAtTop}점 · ${guard}발`);
+  ok(climbed>=11,'자동 플레이가 11층까지 오른다 (이정표·업적 경로를 지나간다)','stage='+climbed);
+  guard=0;
+  while(B.state!=='over' && guard++<200) throwOne(-0.45);               // 일부러 약하게 → 게임오버
+  ok(B.state==='over','목표 미달 + 화살 소진 → 게임 오버','state='+B.state);
+
+  // ① 메모리상 기록
+  ok(B.best>0,'최고점이 올라갔다','best='+B.best);
+  ok(B.meta.bestStage>=11,'최고 층이 기록됐다','bestStage='+B.meta.bestStage);
+  ok(B.meta.totalIn>0,'누적 적중이 쌓였다','totalIn='+B.meta.totalIn);
+  ok(B.meta.ach.s10===1,'10층 업적이 해금됐다');
+  ok(B.meta.mark===10,'이정표(종루) 도달이 기록됐다','mark='+B.meta.mark);
+  ok(B.meta.hand && B.meta.hand.errs.length>0,'손감각 표본이 쌓였다',
+     (B.meta.hand?B.meta.hand.errs.length:0)+'발');
+  ok(B.brokeRecord===false,'첫 판에서는 기록 돌파를 알리지 않았다');
+
+  // ② localStorage 에 실제로 씌었는가
+  ok('tuho_best' in G.store,'tuho_best 가 저장됐다');
+  ok('tuho_meta' in G.store,'tuho_meta 가 저장됐다');
+  let saved=null, parseErr=null;
+  try{ saved=JSON.parse(G.store['tuho_meta']); }catch(e){ parseErr=e.message; }
+  ok(parseErr===null,'저장된 meta 가 올바른 JSON 이다', parseErr||'');
+  ok(saved && saved.bestStage===B.meta.bestStage && saved.mark===B.meta.mark,
+     '저장된 값이 메모리와 일치한다', saved?('bestStage='+saved.bestStage+' mark='+saved.mark):'');
+  ok(saved && saved.hand && saved.hand.errs.length>0,'손감각 표본까지 저장된다');
+
+  // ③ **다시 켜기** — 같은 localStorage 로 새 게임을 띄운다
+  const R=boot(G.store), RB=R.A;
+  ok(RB.best===B.best,'다시 켜면 최고점이 복원된다',RB.best+' / '+B.best);
+  ok(RB.meta.bestStage===B.meta.bestStage,'최고 층이 복원된다',RB.meta.bestStage+'층');
+  ok(RB.meta.mark===B.meta.mark,'이정표가 복원된다','mark='+RB.meta.mark);
+  ok(RB.meta.ach.s10===1,'업적이 복원된다');
+  ok(RB.meta.hand && RB.meta.hand.errs.length===B.meta.hand.errs.length,
+     '손감각 표본이 복원된다 (등급이 초기화되지 않는다)',
+     (RB.meta.hand?RB.meta.hand.errs.length:0)+'발');
+  const hg=RB.handGrade();
+  ok(hg!==null,'다시 켠 직후에도 손감각 등급이 바로 나온다', hg?hg.grade.t+' '+(hg.avg*100).toFixed(1)+'%':'');
+  let perr=null; try{ RB.paintStartScreen(); }catch(e){ perr=e.message; }
+  ok(perr===null,'복원된 기록으로 시작 화면이 그려진다', perr||'');
+  const rec=R.els.startRec.innerHTML||'';
+  console.log('  다시 켠 시작 화면: '+rec.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim());
+  ok(/종루/.test(rec),'복원된 이정표가 시작 화면에 보인다');
+  ok(/손감각/.test(rec),'복원된 손감각 등급이 시작 화면에 보인다');
+
+  // ④ 기록이 있는 상태로 다시 하면 돌파가 뜬다.
+  //    기록을 5층으로 낮춰 두고 그걸 넘긴다 — 11층을 두 번 오르게 할 필요는 없다.
+  RB.meta.bestStage=5; RB.startGame();
+  let g2=0;
+  while(RB.stage<=6 && RB.state!=='over' && g2++<200) playThrow(RB,0);
+  ok(RB.brokeRecord===true,'기록(5층)을 넘으면 돌파를 알린다','stage='+RB.stage);
+  ok(RB.meta.ach.over===1,'자기 돌파 업적이 해금된다');
+
+  // ⑤ 일일 도전 기록도 저장·복원된다
+  const D=boot({}), DB=D.A;
+  DB.startGame('daily'); DB.stage=7; DB.score=640; DB.gameOver();
+  ok('tuho_daily' in D.store,'tuho_daily 가 저장됐다');
+  const D2=boot(D.store).A;
+  ok(D2.daily.best===640 && D2.daily.stage===7,'다시 켜면 오늘 기록이 복원된다',
+     'best='+D2.daily.best+' stage='+D2.daily.stage);
+  ok(D2.dailyView().plays>=1,'오늘 시도 횟수도 복원된다','plays='+D2.dailyView().plays);
 }
 
 console.log(`\n${'='.repeat(50)}\n모두의 화살촉: ${fails} 실패 / ${warns} 경고`);

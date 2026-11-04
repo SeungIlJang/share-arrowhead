@@ -140,12 +140,21 @@ let best=0, meta={bestStage:1,totalIn:0,ach:{},legacyBest:0,legacyStage:0};
 try{ best=parseInt(localStorage.getItem('tuho_best')||'0')||0; }catch(e){}
 try{ const m=JSON.parse(localStorage.getItem('tuho_meta')||'null'); if(m) meta=Object.assign(meta,m); }catch(e){}
 // v0.7(세로 등반)로 넘어오며 기존 최고 기록을 따로 보관한다 — 지우지 않되 섞지도 않는다
+// 세이브에 찍는 판 번호. 이게 없으면 "기록이 있는데 legacy 표시가 없다" 를 전부
+// v0.6 기록으로 오해한다 — v0.7 로 처음 시작한 플레이어의 1회차 기록이 바로 그 모양이라,
+// 앱을 다시 켜고 시작을 누르면 자기 기록이 'v0.6 기록' 으로 넘어가고 0 으로 초기화됐다
+// (2026-11-04 §20 저장 검사를 쓰다 발견. 그전 §8b 는 예외만 보고 결과를 안 봤다).
+const META_V=7;
 function migrateLegacy(){
-  if(meta.legacyBest||meta.legacyStage) return;
-  if(best>0||meta.bestStage>1){
-    meta.legacyBest=best; meta.legacyStage=meta.bestStage;
-    best=0; meta.bestStage=1; saveBest(); saveMeta();
+  if(meta.v>=META_V) return;                       // 이미 세로 등반 세이브다 — 건드리지 않는다
+  if(meta.legacyBest||meta.legacyStage){           // 전에 이관을 끝낸 세이브
+    meta.v=META_V; saveMeta(); return;
   }
+  if(best>0||meta.bestStage>1){                    // 판 번호가 없고 기록이 있다 = 진짜 v0.6 세이브
+    meta.legacyBest=best; meta.legacyStage=meta.bestStage;
+    best=0; meta.bestStage=1; saveBest();
+  }
+  meta.v=META_V; saveMeta();                       // 새 설치도 여기서 도장을 받는다
 }
 function saveMeta(){ try{ localStorage.setItem('tuho_meta',JSON.stringify(meta)); }catch(e){} }
 function saveBest(){ try{ localStorage.setItem('tuho_best',best); }catch(e){} }
