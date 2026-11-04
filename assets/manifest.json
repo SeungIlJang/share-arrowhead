@@ -1,0 +1,13 @@
+{
+  "_주의": "index.html 의 ART 로더 배열은 이 순서대로 생성된다. 아트를 바꾸면 PNG 를 교체하고 `node tools/inline-assets.mjs index.html` 을 다시 돌린다.",
+  "assets": [
+    ["col",   "tuho-tower-column.png"],
+    ["tier",  "tuho-tier.png"],
+    ["sky",   "tuho-sky-tall.png"],
+    ["cloud", "tuho-clouds.png"],
+    ["star",  "tuho-stars.png"],
+    ["ring",  "tuho-pull-ring.png"],
+    ["ret",   "tuho-reticle.png"],
+    ["hand",  "tuho-hand-drag.png"]
+  ]
+}
