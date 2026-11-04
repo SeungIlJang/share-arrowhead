@@ -49,6 +49,14 @@ const warn=(c,l,g)=>{ if(c)console.log('  ✓ '+l+(g?'  '+g:'')); else{warns++;c
 const hdr=t=>console.log('\n== '+t+' ==');
 const W=()=>sandbox.innerWidth, H=()=>sandbox.innerHeight;
 
+/** 변주를 끈 무대. 4층부터 무작위 변주(바람·흔들·좁힘)가 붙어 측정값이 실행마다 흔들린다.
+ *  난이도·적중률을 재는 검사는 전부 이걸 써야 한다 — 흔들리는 검사는 느슨한 검사보다 나쁘다. */
+function plain(s){
+  A.state='start'; A.stage=s; A.setupStage();
+  for(const k of Object.keys(A.mod)) delete A.mod[k];
+  A.layoutStage(); A.calibrate(); A.wind=0;
+}
+
 hdr('1. 지그재그 배치');
 {
   const rows=[];
@@ -101,14 +109,26 @@ hdr('3b. 조준 점선이 실제로 항아리로 가는가');
 {
   // 실기기에서 '점선이 반대로 날아간다'가 발견됐다. 물리(launch)는 방향을 탔는데
   // 예측 궤적(simArc)은 안 타서, 좌우 어느 쪽이든 오른쪽으로만 그렸다.
+  // 변주는 끈다. 이 검사가 보는 건 dir() 미러링이고, 흔들 항아리(sway)에서는
+  // idealPower() 가 '도착할 때의 위치' 를 겨누므로 '지금 위치' 와 비교하면 어긋난다
+  // — 게임 버그가 아니라 검사의 의미 불일치다. 변주 안전성은 §8c 가 본다.
   let bad=[];
   for(let s2=1;s2<=12;s2++){
-    A.stage=s2; A.setupStage();
+    plain(s2);
     A.angle=Math.round((A.aLo+A.aHi)/2);
     const p=A.idealPower(); if(p==null){ bad.push(s2+'층 사거리밖'); continue; }
     const pts=A.simArc(A.angle*Math.PI/180, A.vLo+(A.vHi-A.vLo)*p, 1, false);
-    // 궤적 위 어떤 점이든 항아리 입구를 지나가야 한다 (끝점만 보면 지나친 경우를 놓친다)
-    let d=1e9; for(const q of pts) d=Math.min(d,Math.hypot(q.x-A.pot.x,q.y-A.pot.rimY));
+    // 궤적이 항아리 입구를 지나가야 한다 (끝점만 보면 지나친 경우를 놓친다).
+    // 꼭짓점이 아니라 **선분**까지의 거리를 잰다 — simArc 는 1/36초마다 점을 남겨
+    // 샘플 간격이 ~33px 인데, 입구 반폭이 그보다 좁아지면(후반 층·좁힘 변주)
+    // 궤적이 입구를 제대로 지나가도 꼭짓점 거리로는 벗어난 것처럼 보인다.
+    let d=1e9;
+    for(let i=1;i<pts.length;i++){
+      const ax=pts[i-1].x, ay=pts[i-1].y, bx=pts[i].x, by=pts[i].y;
+      const vx=bx-ax, vy=by-ay, L2=vx*vx+vy*vy;
+      const t=L2>0 ? Math.max(0,Math.min(1,((A.pot.x-ax)*vx+(A.pot.rimY-ay)*vy)/L2)) : 0;
+      d=Math.min(d,Math.hypot(ax+vx*t-A.pot.x, ay+vy*t-A.pot.rimY));
+    }
     if(d>A.pot.mouth/2) bad.push(s2+'층 점선이 입구에서 '+d.toFixed(0)+'px 벗어남');
   }
   if(bad.length) console.log('    '+bad.slice(0,5).join(', '));
@@ -352,7 +372,7 @@ hdr('9. 재구성 목표 — 행위 밀도와 조준 가능성');
   }
   let earHit=0, earTry=0, center=0;
   for(let s2=2;s2<=9;s2++){
-    A.state='start'; A.stage=s2; A.setupStage(); A.wind=0; A.newArrow();
+    plain(s2); A.newArrow();
     const side=A.dir()>0?1:-1;
     const sol=aimAtX(A.pot.baseX + side*A.pot.earOff);
     if(!sol) continue;
@@ -363,8 +383,50 @@ hdr('9. 재구성 목표 — 행위 밀도와 조준 가능성');
     if(last==='ear') earHit++; else if(last==='gwan'||last==='in') center++;
   }
   console.log(`  귀를 겨냥한 ${earTry}발 → 귀 ${earHit}발, 중앙 ${center}발`);
-  ok(earTry>0 && earHit>=Math.ceil(earTry*0.5),'귀를 노리면 절반 이상 귀에 들어간다 (구역이 표적이 됨)',
+  // 기준을 50% → 60% 로 올렸다. 50% 는 입구를 좁혔을 때 4~5/8 로 임계선에 딱 걸려서,
+  // 귀가 사실상 안 맞게 된 회귀를 통과시켰다. 변주를 끈 뒤로는 값이 흔들리지 않는다.
+  ok(earTry>0 && earHit>=Math.ceil(earTry*0.6),'귀를 노리면 60% 이상 귀에 들어간다 (구역이 표적이 됨)',
      earHit+'/'+earTry);
+}
+
+hdr('11. 난이도 램프 — 오를수록 정말 어려워지는가');
+{
+  // 이 검사가 없어서 "18층부터 난이도가 멈춤" 을 눈으로 못 봤다. 체감 난이도는 사거리나
+  // 입구폭이 아니라 **손 오차 허용폭**(휘두름 세기를 몇 % 틀려도 들어가는가)이다. 그걸 직접 잰다.
+  const sc=Math.sqrt(A.gravity()*W()), vOf=p=>sc*(0.96+p*0.72);
+  function shoot(s,a,v){
+    plain(s); A.newArrow();
+    A.setAim(a,(v-A.vLo)/(A.vHi-A.vLo)); A.launch();
+    let t=0; while(A.state==='fly'&&t<8){ A.update(1/120); t+=1/120; }
+    return A.lastZone||null;
+  }
+  const rows=[];
+  for(const s of [1,5,12,20,30]){
+    plain(s); A.newArrow();
+    const a=Math.round((A.aLo+A.aHi)/2);
+    const v0=A.solveSpeed(A.spanOf(),A.riseOf(),a*Math.PI/180);
+    if(v0==null) continue;
+    const p0=A.speedToPow(v0);
+    let lo=p0, hi=p0;
+    for(let d=0.005; d<=0.40; d+=0.005){
+      if(p0-d>=0 && shoot(s,a,vOf(p0-d))) lo=p0-d;
+      if(p0+d<=1 && shoot(s,a,vOf(p0+d))) hi=p0+d;
+    }
+    rows.push({s,p0,width:hi-lo,mouth:A.pot.mouth,ear:A.pot.earW});
+  }
+  for(const r of rows)
+    console.log(`  ${String(r.s).padStart(2)}층  필요세기 ${(r.p0*100).toFixed(0).padStart(2)}%  허용폭 ${(r.width*100).toFixed(1).padStart(4)}%  입구 ${r.mouth.toFixed(0).padStart(2)}px  귀 ${r.ear.toFixed(1)}px`);
+  const f=rows[0], l=rows[rows.length-1];
+  const ramp=f.width/l.width;
+  const span=(l.p0-f.p0)*100;
+  console.log(`  램프 ${ramp.toFixed(1)}배 · 필요세기 ${(f.p0*100).toFixed(0)}%~${(l.p0*100).toFixed(0)}% (${span.toFixed(0)}포인트)`);
+  ok(rows.length===5,'모든 표본 층에 해가 있다');
+  ok(rows.every((r,i)=>i===0||r.width<=rows[i-1].width+0.005),'허용폭이 층마다 줄어든다 (난이도가 단조 증가)');
+  ok(ramp>=2.5,'1층 → 30층 허용폭이 2.5배 이상 좁아진다 (오를 이유가 있다)',ramp.toFixed(1)+'배');
+  ok(span>=30,'층마다 다른 세기를 요구한다 (필요세기 폭 30포인트 이상)',span.toFixed(0)+'포인트');
+  // 1층은 너그러워야 한다 — 시범 궤적을 보고 따라 던진 첫 발이 들어가야 한다
+  ok(f.width>=0.15,'1층은 손 오차 15% 까지 받아준다 (첫 발이 들어간다)',(f.width*100).toFixed(1)+'%');
+  ok(l.ear>=4,'30층에서도 귀가 4px 이상이다 (구역이 사라지지 않는다)',l.ear.toFixed(1)+'px');
 }
 
 hdr('10. 첫 층 시범 궤적 — 가르치는 선이 거짓말하면 안 된다');
