@@ -49,6 +49,8 @@ vm.runInContext(code+`;globalThis.__a={
   get mode(){return mode},set mode(v){mode=v},get daily(){return daily},
   get rngState(){return rngState},set rngState(v){rngState=v},
   rollDaily,dailyView,seedFrom,todayKey,prevKey,shareText,makeCard,paintStartScreen,
+  ACH,MARKS,nextMark,markAt,HAND_GRADES,HAND_MIN,HAND_N,handGrade,recordThrow,unlock,
+  get brokeRecord(){return brokeRecord},get perfectRun(){return perfectRun},
   get aimPow(){return aimPow},get aimSpeed(){return aimSpeed},get needPow(){return needPow},get lastZone(){return lastZone},get dragging(){return dragging} };`, ctx, {filename:'proto.js'});
 const A=sandbox.__a;
 
@@ -711,6 +713,82 @@ ok(A.runStats.gwan===0&&A.runStats.in===0,'새 판 시작 시 구역 집계 초�
 let cardErr2=null; try{ A.makeCard(); }catch(e){ cardErr2=e&&(e.message||String(e)); }
 ok(cardErr2===null,'일반 모드에서도 카드가 그려진다', cardErr2||'');
 
+
+hdr('19. 보상 계층 — 왜 계속 던지고 싶은가');
+{
+  // ① 이정표가 5층마다 있고 다음 목표가 늘 계산된다
+  console.log('  이정표: '+A.MARKS.map(m=>m.s+'층 '+m.t).join(' · '));
+  ok(A.MARKS.length>=6 && A.MARKS.every((m,i)=>m.s===(i+1)*5),'이정표가 5층마다 놓여 있다');
+  ok(A.nextMark(1).s===5 && A.nextMark(5).s===10 && A.nextMark(12).s===15,'다음 이정표가 올바르게 계산된다');
+  ok(A.nextMark(30)===null,'마지막 이정표를 넘으면 다음이 없다');
+  ok(A.markAt(10)!==null && A.markAt(11)===null,'이정표 층에서만 도달 판정');
+
+  // ② 이정표에 도달하면 점수와 기록이 남는다
+  A.startGame(); A.meta.mark=0;
+  A.stage=9; const s0=A.score;
+  A.nextStage();
+  ok(A.stage===10 && A.score>s0,'이정표 층 도달 시 보너스 점수', '+'+(A.score-s0)+'점');
+  ok(A.meta.mark===10,'도달한 이정표가 저장된다','mark='+A.meta.mark);
+
+  // ③ 자기 기록 돌파 — 첫 판(기록 1~2층)에는 뜨지 않는다
+  A.meta.bestStage=1; A.startGame();
+  A.stage=4; A.nextStage();
+  ok(A.brokeRecord===false,'기록이 1층일 때는 돌파를 알리지 않는다 (모든 층이 신기록이면 의미가 없다)');
+  A.meta.bestStage=8; A.startGame();
+  A.stage=8; A.nextStage();
+  ok(A.brokeRecord===true,'기록(8층)을 넘으면 돌파를 알린다');
+  const once=A.brokeRecord; A.stage=12; A.nextStage();
+  ok(once===true && A.brokeRecord===true,'돌파 알림은 판에 한 번만 (매 층 반복하지 않는다)');
+
+  // ④ 손감각 등급 — 표본이 모자라면 말하지 않는다
+  A.meta.hand={errs:[]};
+  ok(A.handGrade()===null,'던진 기록이 없으면 등급을 말하지 않는다');
+  A.meta.hand={errs:new Array(A.HAND_MIN-1).fill(0.01)};
+  ok(A.handGrade()===null,`표본 ${A.HAND_MIN}발 미만이면 등급 보류`);
+  A.meta.hand={errs:new Array(A.HAND_MIN).fill(0.01)};
+  ok(A.handGrade()!==null,'표본이 차면 등급이 나온다');
+
+  // ⑤ 등급 임계값이 §11 에서 실측한 허용폭(반폭)과 맞는가.
+  //    등급이 "이 손이면 몇 층까지" 를 뜻해야 플레이어가 쓸 수 있는 지표가 된다.
+  console.log('  등급: '+A.HAND_GRADES.map(g=>g.t+' ≤'+(g.max*100).toFixed(1)+'%'+(g.f?'('+g.f+'층)':'')).join(' · '));
+  ok(A.HAND_GRADES.every((g,i)=>i===0||g.max>A.HAND_GRADES[i-1].max),'등급 임계값이 단조 증가');
+  ok(A.HAND_GRADES[A.HAND_GRADES.length-1].max>1,'마지막 등급이 모든 오차를 받는다 (등급 없음 상태가 안 생긴다)');
+
+  // ⑥ **가장 중요** — 이 지표가 실제 실력을 반영하는가.
+  //    잘 던지면 올라가고 엉망으로 던지면 내려가야 한다. 아니면 거짓 지표다.
+  function playThrows(err,n){
+    A.meta.hand={errs:[]};
+    for(let i=0;i<n;i++){
+      plain(6); A.newArrow();
+      const ip=A.idealPower(); if(ip==null) continue;
+      A.setAim(Math.round((A.aLo+A.aHi)/2), Math.max(0,Math.min(1,ip+err)));
+      A.launch();
+      let t=0; while(A.state==='fly'&&t<8){ A.update(1/120); t+=1/120; }
+    }
+    return A.handGrade();
+  }
+  const good=playThrows(0, 14), bad=playThrows(0.30, 14);
+  console.log(`  정확히 던진 손: ${good?good.grade.t+' (오차 '+(good.avg*100).toFixed(1)+'%)':'(없음)'}`);
+  console.log(`  엉망으로 던진 손: ${bad?bad.grade.t+' (오차 '+(bad.avg*100).toFixed(1)+'%)':'(없음)'}`);
+  ok(good&&bad,'두 경우 모두 등급이 계산된다');
+  ok(good.avg<bad.avg,'정확히 던질수록 오차가 작게 기록된다',
+     (good.avg*100).toFixed(1)+'% < '+(bad.avg*100).toFixed(1)+'%');
+  ok(good.idx<bad.idx,'정확히 던진 손이 더 높은 등급을 받는다 (지표가 실력을 반영한다)',
+     good.grade.t+' > '+bad.grade.t);
+
+  // ⑦ 표본은 최근 N발만 — 옛 실력에 발목이 잡히면 늘어도 안 올라간다
+  A.meta.hand={errs:new Array(A.HAND_N+30).fill(0.2)};
+  A.startGame(); plain(6); A.newArrow();
+  const ip2=A.idealPower();
+  if(ip2!=null){ A.setAim(Math.round((A.aLo+A.aHi)/2), ip2); A.launch(); }
+  ok(A.meta.hand.errs.length<=A.HAND_N,`표본이 최근 ${A.HAND_N}발로 유지된다`,A.meta.hand.errs.length+'발');
+
+  // ⑧ 모을 것이 남아 있는가 — 업적이 몇 판에 다 열리면 수집 동기가 죽는다
+  console.log('  업적 '+A.ACH.length+'개: '+A.ACH.map(a=>a.t).join(', '));
+  ok(A.ACH.length>=15,'업적이 15개 이상이다 (몇 판에 다 열리지 않는다)',A.ACH.length+'개');
+  ok(new Set(A.ACH.map(a=>a.id)).size===A.ACH.length,'업적 id 가 겹치지 않는다');
+  ok(A.ACH.some(a=>a.id==='s30')&&A.ACH.some(a=>a.id==='hand'),'후반·숙련 업적이 있다');
+}
 
 console.log(`\n${'='.repeat(50)}\n모두의 화살촉: ${fails} 실패 / ${warns} 경고`);
 process.exit(fails?1:0);

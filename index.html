@@ -14,6 +14,8 @@
   #quiver .spent{opacity:.22}
   #goal{color:#aef5b0;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000}
   #goal.done{color:#ffe14d}
+  #climb{color:#c9b9ff;font-size:11px;font-weight:700;text-shadow:0 2px 3px #000;margin-top:2px}
+  #climb b{color:#ffe14d}
   #wind{position:fixed;top:calc(env(safe-area-inset-top,0px) + 98px);left:0;right:0;text-align:center;color:#9fd0ff;font-size:13px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:16px}
   #mod{position:fixed;top:calc(env(safe-area-inset-top,0px) + 118px);left:0;right:0;text-align:center;color:#ffbe6b;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:15px}
   #hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);left:0;right:0;text-align:center;color:#ffe14d;font-size:15px;font-weight:800;text-shadow:0 2px 4px #000;pointer-events:none;z-index:5}
@@ -51,6 +53,7 @@
 <div id="bar">
   <div id="quiver"></div>
   <div id="goal"></div>
+  <div id="climb"></div>
 </div>
 <div id="btns">
   <button class="iconbtn" id="muteBtn">🔊</button>
@@ -170,6 +173,7 @@ function rollDaily(){
   const t=todayKey();
   if(daily.date!==t){
     daily.streak = (daily.last===prevKey(t)) ? (daily.streak||0)+1 : 1;
+    if(daily.streak>=3) unlock('daily3');
     daily.date=t; daily.best=0; daily.stage=1; daily.plays=0; daily.last=t;
   }
   daily.plays++; saveDaily();
@@ -184,8 +188,78 @@ const ACH=[
   {id:'c5',    t:'오연발',       d:'5연속 성공'},
   {id:'all5',  t:'전관(全貫)',    d:'한 층에서 5발 전부 성공'},
   {id:'s10',   t:'십층 궁사',     d:'10층 도달'},
-  {id:'s20',   t:'투호 신선',     d:'20층 도달'}
+  {id:'s20',   t:'투호 신선',     d:'20층 도달'},
+  // 여기까지는 몇 판만 해도 다 열린다. 모을 것이 남아 있어야 계속 던진다.
+  {id:'s30',   t:'상륜 등정',     d:'30층 도달'},
+  {id:'hand',  t:'손이 기억한다', d:'손감각 명인 이상'},
+  {id:'ear3',  t:'귀만 노린다',   d:'한 층에서 귀 3발'},
+  {id:'gwan3', t:'삼연관(三連貫)', d:'관을 3연속'},
+  {id:'climb3',t:'무결 등반',     d:'3층 연속 전관(全貫)'},
+  {id:'over',  t:'자기 돌파',     d:'최고 기록을 넘어섰다'},
+  {id:'daily3',t:'사흘 개근',     d:'일일 도전 3일 연속'},
+  {id:'wind',  t:'바람 읽기',     d:'바람 부는 층에서 전관'}
 ];
+// ---- 누각 이정표 ----
+// 층 번호만 올라가면 7층이 6층과 똑같이 느껴진다. 다음에 무엇이 오는지가 보여야
+// "저기까지만" 이 생긴다. 5층마다 누각의 실제 부위에 이름을 붙여 목표로 세운다.
+const MARKS=[
+  {s:5,  t:'처마',     d:'첫 처마를 넘었다'},
+  {s:10, t:'종루(鐘樓)', d:'종이 걸린 층'},
+  {s:15, t:'단청(丹靑)', d:'단청이 칠해진 층'},
+  {s:20, t:'구름다리',  d:'구름을 밟고 건넌다'},
+  {s:25, t:'풍경(風磬)', d:'처마 끝 풍경이 울린다'},
+  {s:30, t:'상륜(上輪)', d:'누각의 꼭대기'}
+];
+/** 아직 못 올라간 다음 이정표 (전부 지났으면 null) */
+function nextMark(s){ return MARKS.find(m=>m.s>s) || null; }
+/** 이 층에 도달해서 새로 찍은 이정표 */
+function markAt(s){ return MARKS.find(m=>m.s===s) || null; }
+
+// ---- 손감각 등급 ----
+// 이 게임이 기르는 기술은 '얼마나 세게' 를 손으로 맞히는 것이다. 그런데 그 실력이
+// 늘어도 보여주는 데가 없었다 — 기록은 최고 층 하나뿐이라, 운 나쁜 판에서는 손이
+// 좋아졌어도 아무 증거가 남지 않는다. 그래서 던질 때마다의 세기 오차를 누적한다.
+//
+// 임계값은 §11 에서 실측한 층별 허용폭의 **절반**(한쪽 오차)에서 가져왔다.
+// 평균 오차가 그 층의 허용 반폭보다 작으면 그 층을 안정적으로 넘길 수 있다는 뜻이라,
+// 등급이 곧 "이 손이면 몇 층까지" 가 된다.
+const HAND_N=50;             // 최근 몇 발로 재는가
+const HAND_MIN=10;           // 이만큼은 던져 봐야 등급을 말한다
+const HAND_GRADES=[
+  {max:0.0275, t:'투호 신선', f:30},
+  {max:0.0375, t:'명인',     f:20},
+  {max:0.0525, t:'상급',     f:12},
+  {max:0.0775, t:'중급',     f:5},
+  {max:0.1050, t:'초보',     f:1},
+  {max:99,     t:'입문',     f:0}
+];
+/** 최근 던지기들의 평균 세기 오차 → 등급. 표본이 모자라면 null */
+function handGrade(){
+  const e=(meta.hand&&meta.hand.errs)||[];
+  if(e.length<HAND_MIN) return null;
+  const avg=e.reduce((a,b)=>a+b,0)/e.length;
+  const g=HAND_GRADES.find(x=>avg<=x.max);
+  return {avg, grade:g, idx:HAND_GRADES.indexOf(g), n:e.length};
+}
+/** 던진 세기가 얼마나 틀렸는지 적어 둔다 (launch 에서 부른다) */
+function recordThrow(){
+  if(needPow<0 || aimPow<0) return;
+  if(!meta.hand) meta.hand={errs:[]};
+  const before=handGrade();
+  meta.hand.errs.push(Math.round(Math.abs(aimPow-needPow)*1000)/1000);
+  // shift() 한 번으로는 이미 상한을 넘겨 저장돼 있던 배열이 영원히 안 줄어든다
+  // (push 로 1 늘고 shift 로 1 줄어 제자리). 그러면 옛 실력이 평균에 계속 섞여
+  // 손이 좋아져도 등급이 안 올라간다. 초과분을 한 번에 잘라낸다.
+  if(meta.hand.errs.length>HAND_N) meta.hand.errs.splice(0, meta.hand.errs.length-HAND_N);
+  const after=handGrade();
+  // 승급은 그 자리에서 알려 준다 — 판이 끝나기를 기다리면 연결이 끊긴다
+  if(after && (!before || after.idx<before.idx) && after.idx<HAND_GRADES.length-1){
+    toastQ.push('✋ 손감각 '+after.grade.t+' — 오차 '+(after.avg*100).toFixed(1)+'%');
+    if(after.idx<=1) unlock('hand');
+  }
+  saveMeta();
+}
+
 let toastQ=[], toastT=0;
 function unlock(id){ if(meta.ach[id])return; meta.ach[id]=1; saveMeta(); const a=ACH.find(x=>x.id===id); if(a) toastQ.push('🏅 '+a.t+' — '+a.d); }
 function pumpToast(dt){
@@ -206,6 +280,11 @@ const MODS=[
 let state='start';  // start | aim | power | fly | result | clear | over
 let score=0, combo=0, stage=1;
 let arrowsLeft=5, arrowsTotal=5, inCount=0, quota=1, stageScore=0;
+let runBest=1;              // 이 판을 시작할 때의 최고 층 — 돌파 판정 기준
+let brokeRecord=false;      // 이 판에서 이미 돌파를 알렸나
+let perfectRun=0;           // 연속 전관(全貫) 층 수
+let gwanStreak=0;           // 연속 관(貫)
+let floorZones={};          // 이 층에서의 구역별 적중 (판 단위인 runStats 와 다르다)
 let angle=28, aDir=1;        // 조준 각도(도), 핑퐁
 let power=0, pDir=1;         // 파워 0..1 핑퐁
 let wind=0;                  // 가로 바람 가속(px/s^2), + = 오른쪽
@@ -461,7 +540,7 @@ function setupStage(){
   }
   arrowsTotal = s>=10 ? 6 : 5;   // 후반엔 화살 1발 더
   arrowsLeft = arrowsTotal;
-  inCount = 0; stageScore = 0;
+  inCount = 0; stageScore = 0; floorZones = {};
   quota = s<=2 ? 1 : s<=8 ? 2 : s<=16 ? 3 : 4;
   stuck=[]; ground=[]; crosses=[];
   paintBar();
@@ -560,6 +639,15 @@ function paintBar(){
   const g=$('goal'); const done=inCount>=quota;
   g.textContent = (done?'✔ 통과 확정 ':'목표 ')+inCount+' / '+quota+(done?' · 남은 화살은 보너스!':' 넣기');
   g.className = done?'done':'';
+  // 다음 목표를 늘 보여 준다. "저기까지만" 이 한 판을 더 끌고 간다.
+  // 최고 기록이 더 가까우면 그쪽을 먼저 내건다 — 남의 이름보다 내 기록이 당긴다.
+  const mk=nextMark(stage), bs=meta.bestStage||1;
+  const toBest=bs-stage;
+  let line='';
+  if(mode!=='daily' && toBest>0 && (!mk || toBest<=mk.s-stage)) line='최고 기록까지 <b>'+toBest+'층</b>';
+  else if(mk) line='다음 '+mk.t+'까지 <b>'+(mk.s-stage)+'층</b>';
+  else line='상륜까지 올랐다 — 더 갈 수 있을까';
+  $('climb').innerHTML=line;
   $('wind').textContent = (Math.abs(wind)>1)
     ? ('💨 바람 '+(wind>0?'→':'←')+' '+'▮'.repeat(clamp(Math.round(Math.abs(wind)/32),1,6)))
     : '바람 없음';
@@ -579,7 +667,25 @@ function newArrow(){
   clearMsg(); paintBar();
 }
 function nextStage(){ stage++; if(stage>meta.bestStage){meta.bestStage=stage; saveMeta();}
-  if(stage>=10)unlock('s10'); if(stage>=20)unlock('s20');
+  if(stage>=10)unlock('s10'); if(stage>=20)unlock('s20'); if(stage>=30)unlock('s30');
+  // 자기 기록 돌파 — 한 판에 한 번만. 기록이 1~2층인 첫 판에는 띄우지 않는다
+  // (모든 층이 '신기록' 이면 아무것도 신기록이 아니다).
+  if(!brokeRecord && mode!=='daily' && runBest>=3 && stage>runBest){
+    brokeRecord=true; unlock('over');
+    toastQ.push('🏆 최고 기록 돌파! — '+runBest+'층을 넘었다');
+    flash=0.45; sfx.vib([30,50,30,50]);
+  }
+  // 누각 이정표 — 이름이 붙은 층에 도달
+  const mk=markAt(stage);
+  if(mk){
+    const bonus=mk.s*20; score+=bonus;
+    if(!meta.mark || meta.mark<mk.s){ meta.mark=mk.s; saveMeta(); }
+    toastQ.push('🏯 '+mk.t+' 도달 — '+mk.d+' (+'+bonus+'점)');
+    flash=0.5; sfx.clear();
+    for(let i=0;i<48;i++){ const a=Math.random()*Math.PI*2, sp=2+Math.random()*6;
+      parts.push({x:W/2,y:padY()-40,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,life:1.5,
+                  r:2+Math.random()*3,c:['#ffe14d','#fff','#c9b9ff','#ffcf5c'][i%4]}); }
+  }
   climbed+=riseFor(stage-1); camY=0;   // 올라선 만큼 기둥 타일도 함께 흐른다
   setupStage(); newArrow(); setTop(); }
 
@@ -587,7 +693,7 @@ function launch(){
   const sp=aimSpeed;
   arrow={ x:originX(), y:originY(), px:originX(), py:originY(),
           vx:aimUX*sp, vy:aimUY*sp, ang:Math.atan2(aimUY,aimUX), noPot:false, hitBody:false };
-  throwFlash=1.25; needPow=neededPowNow();
+  throwFlash=1.25; needPow=neededPowNow(); recordThrow();
   arrowsLeft--; state='fly'; $('hint').textContent=''; sfx.vib([8,24]); sfx.shoot(); paintBar();
 }
 function tap(){
@@ -606,6 +712,9 @@ function stageClear(){
   let bonus = Math.round((20+stage*9) * (perfect?2:1) * mod.scoreMul);
   score += bonus; stageScore += bonus;
   if(perfect) unlock('all5');
+  perfectRun = perfect ? perfectRun+1 : 0;
+  if(perfectRun>=3) unlock('climb3');
+  if(perfect && Math.abs(wind)>1) unlock('wind');
   if(score>best){ best=score; saveBest(); }
   showMsg(perfect?'전관(全貫)! 🏺✨':'한 층 올라간다! 🎊', perfect?'#ffe14d':'#aef5b0');
   showSub((perfect?'5발 전부 명중 보너스 ×2 · ':'')+'통과 보너스 +'+bonus+'점 · 이 층 '+stageScore+'점');
@@ -625,8 +734,12 @@ function gameOver(){
       +'<b>'+score+'</b>점 · '+stage+'층에서 멈춤'+(rec?' 🏆 <b>오늘 신기록!</b>':'')+'<br>'
       +'오늘 최고 '+daily.best+'점 · '+daily.plays+'번째 시도'+(daily.streak>1?' · 🔥'+daily.streak+'일 연속':'');
   } else {
-    $('overSub').innerHTML='최종 <b>'+score+'</b>점 · '+stage+'단계에서 멈춤<br>'
-      +'이 층에서 '+inCount+'/'+quota+' 넣음 · 최고 '+best+(rec?' 🏆 <b>신기록!</b>':'');
+    // 기록을 못 깼어도 가져갈 것을 남긴다 — 손감각과 다음 이정표.
+    const hg=handGrade(), mk=nextMark(stage);
+    $('overSub').innerHTML='최종 <b>'+score+'</b>점 · '+stage+'층에서 멈춤<br>'
+      +'이 층에서 '+inCount+'/'+quota+' 넣음 · 최고 '+best+(rec?' 🏆 <b>신기록!</b>':'')
+      +(hg?'<br>✋ 손감각 <b>'+hg.grade.t+'</b> · 오차 '+(hg.avg*100).toFixed(1)+'%':'')
+      +(mk?'<br>🏯 '+mk.t+'까지 '+(mk.s-stage)+'층':'');
   }
   // 일일 도전은 모두가 같은 판이라야 비교가 되므로 '이어하기'를 막는다.
   $('continueBtn').style.display = (daily_||continuedThisRun) ? 'none' : 'block';
@@ -658,6 +771,10 @@ function finishIn(z,cx,tanPhi){
   meta.totalIn++; if(meta.totalIn===1)unlock('in1'); saveMeta();
   if(z==='gwan')unlock('gwan'); if(z==='ear')unlock('ear'); if(z==='teeter')unlock('hankut');
   if(combo>=5)unlock('c5');
+  floorZones[z]=(floorZones[z]||0)+1;
+  if(floorZones.ear>=3)unlock('ear3');
+  gwanStreak = z==='gwan' ? gwanStreak+1 : 0;
+  if(gwanStreak>=3)unlock('gwan3');
   const comboMul = 1 + Math.min(10,combo)*0.1;
   const gain = Math.round((10+stage*3) * Z.mul * comboMul * mod.scoreMul);
   score += gain; stageScore += gain;
@@ -1180,6 +1297,7 @@ function startGame(m){
   if(mode==='daily'){ rollDaily(); rngState=seedFrom('tuho-'+daily.date); }
   score=0; combo=0; stage=1; paused=false; continuedThisRun=false;
   runStats={gwan:0,ear:0,teeter:0,in:0};
+  runBest=meta.bestStage||1; brokeRecord=false; perfectRun=0; gwanStreak=0; floorZones={};
   setupStage.prev='';        // 변주 순서도 시드에 포함된다 — 이전 판의 잔재가 남으면 재현이 깨진다
   parts=[]; toastQ=[]; $('pauseBtn').textContent='⏸';
   $('start').classList.add('hidden'); $('over').classList.add('hidden');
@@ -1190,8 +1308,16 @@ function startGame(m){
 }
 function paintStartScreen(){
   const d=dailyView();
-  $('startRec').textContent='최고 '+best+'점 · 최고 '+meta.bestStage+'층 · 업적 '+ACH.filter(a=>meta.ach[a.id]).length+'/'+ACH.length
-    + ((meta.legacyBest||meta.legacyStage) ? '   (v0.6 기록 '+meta.legacyBest+'점 · '+meta.legacyStage+'단계)' : '');
+  // 손감각 등급을 맨 앞에 둔다. 최고 층은 운이 섞이지만 이 값은 내 손만 반영하고,
+  // 기록을 못 깬 판에서도 올라가므로 "오늘은 손이 좋아졌다" 가 성립한다.
+  const hg=handGrade();
+  const mk=MARKS.filter(m=>m.s<=(meta.mark||0)).pop();
+  $('startRec').innerHTML=
+      (hg ? '✋ 손감각 <b>'+hg.grade.t+'</b> (오차 '+(hg.avg*100).toFixed(1)+'%'
+            +(hg.grade.f?' · '+hg.grade.f+'층급':'')+')<br>' : '')
+    + (mk ? '🏯 '+mk.t+'까지 올랐다 · ' : '')
+    + '최고 '+best+'점 · '+meta.bestStage+'층 · 업적 '+ACH.filter(a=>meta.ach[a.id]).length+'/'+ACH.length
+    + ((meta.legacyBest||meta.legacyStage) ? '<br>(v0.6 기록 '+meta.legacyBest+'점 · '+meta.legacyStage+'단계)' : '');
   $('dailyRec').textContent = d.plays
     ? ('오늘 '+d.best+'점 · '+d.stage+'층 · '+d.plays+'번 시도'+(d.streak>1?' · 🔥'+d.streak+'일 연속':''))
     : ('매일 바뀌는 같은 판으로 겨뤄요'+(d.streak>0?' · 🔥'+d.streak+'일 연속':''));
