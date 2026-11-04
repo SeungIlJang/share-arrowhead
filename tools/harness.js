@@ -788,6 +788,31 @@ hdr('19. 보상 계층 — 왜 계속 던지고 싶은가');
   ok(A.ACH.length>=15,'업적이 15개 이상이다 (몇 판에 다 열리지 않는다)',A.ACH.length+'개');
   ok(new Set(A.ACH.map(a=>a.id)).size===A.ACH.length,'업적 id 가 겹치지 않는다');
   ok(A.ACH.some(a=>a.id==='s30')&&A.ACH.some(a=>a.id==='hand'),'후반·숙련 업적이 있다');
+
+  // ⑨ 시작 화면이 이걸 실제로 보여주는가.
+  //    하네스가 paintStartScreen 을 한 번도 부르지 않고 있었다 — 노출만 돼 있었다.
+  //    보상 계층은 '보여주는 것' 이 전부라서, 그리다 터지면 계층 자체가 없는 것과 같다.
+  function startText(setup){
+    setup();
+    let err=null; try{ A.paintStartScreen(); }catch(e){ err=e&&(e.message||String(e)); }
+    return {err, rec:els.startRec.innerHTML||els.startRec.textContent||'', daily:els.dailyRec.textContent||''};
+  }
+  const sNew=startText(()=>{ A.meta.hand={errs:[]}; A.meta.mark=0; });
+  ok(sNew.err===null,'기록이 없는 첫 실행에서도 시작 화면이 그려진다', sNew.err||'');
+  ok(!/손감각/.test(sNew.rec),'표본이 없으면 손감각을 띄우지 않는다');
+
+  const sPro=startText(()=>{ A.meta.hand={errs:new Array(20).fill(0.03)}; A.meta.mark=15; });
+  ok(sPro.err===null,'기록이 있는 실행에서도 그려진다', sPro.err||'');
+  console.log('  시작 화면: '+sPro.rec.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim());
+  ok(/손감각/.test(sPro.rec)&&/명인/.test(sPro.rec),'손감각 등급이 시작 화면에 보인다');
+  ok(/단청/.test(sPro.rec),'최고 도달 이정표가 시작 화면에 보인다');
+  ok(/업적/.test(sPro.rec),'업적 개수도 함께 보인다');
+
+  // HUD 의 '다음 목표' 줄도 그려지는지 (paintBar 경로)
+  A.meta.bestStage=9; A.startGame(); A.stage=6; A.setupStage(); A.newArrow();
+  const climb=els.climb.innerHTML||'';
+  console.log('  HUD 다음 목표: '+climb.replace(/<[^>]*>/g,''));
+  ok(/\d+층/.test(climb),'HUD 에 다음 목표가 층수로 표시된다', climb.replace(/<[^>]*>/g,''));
 }
 
 console.log(`\n${'='.repeat(50)}\n모두의 화살촉: ${fails} 실패 / ${warns} 경고`);
