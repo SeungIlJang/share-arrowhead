@@ -104,7 +104,8 @@ node tools/check-pot-art.mjs <항아리.png>
 | [design/DESIGN-BRIEF.md](design/DESIGN-BRIEF.md) | **발주서** — 톤앤매너, 팔레트, 에셋 목록, 납품 규격, 검수 체크리스트 |
 | [design/pot-spec.svg](design/pot-spec.svg) | **항아리 치수 도면** — 입구·귀 비율은 적중 판정 좌표이므로 준수 필수 |
 | [design/screen-layout.svg](design/screen-layout.svg) | 화면 구성·세이프에어리어·실제 렌더 크기 — ⚠️ 가로 배치 기준이라 **현재 무효** |
-| [design/ART-PROMPTS.md](design/ART-PROMPTS.md) | **Codex 아트 작업 지시서 (개정 2 · 세로 등반)** |
+| [design/ART-PROMPTS.md](design/ART-PROMPTS.md) | **Codex 아트 작업 지시서** — 개정 3 은 §7(누각 기둥 재발주) 하나 |
+| [store-assets/](store-assets/) | 플레이콘솔 스크린샷 4장 (1170×2532) |
 
 > 사람 디자이너에게는 `design/` 폴더를 그대로 전달합니다 (발주서 → 도면 순).
 > 이미지 생성은 Codex가 맡고, 치수 검증·합성·게임 적용은 Claude가 맡습니다.

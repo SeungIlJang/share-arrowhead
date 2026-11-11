@@ -1,8 +1,10 @@
-# 모두의 화살촉 — Codex 아트 작업 지시서 (개정 2 · 세로 등반)
+# 모두의 화살촉 — Codex 아트 작업 지시서 (개정 3 · 누각 기둥 재발주)
 
 > **대상**: 이미지 생성을 담당하는 Codex 세션
 > **역할 분담**: 생성 = Codex · 치수 검증/합성/게임 적용 = Claude
 > 치수 근거는 [pot-spec.svg](pot-spec.svg), 전체 배경은 [DESIGN-BRIEF.md](DESIGN-BRIEF.md)
+>
+> **개정 3 은 §7 하나뿐입니다.** 나머지(§1~§6)는 그대로 유효하고 재발주가 아닙니다.
 
 ---
 
@@ -342,3 +344,112 @@ fully transparent background, centered
 
 Claude 가 ① 치수 실측·합성 ② 게임 적용 ③ 하네스 재실행(구역 판정으로
 *보이는 구멍 = 적중 좌표* 확인) 을 수행합니다.
+
+---
+
+## 7. 개정 3 — `tuho-tower-column.png` 재발주 (P0, **420 × 1800**)
+
+### 왜 다시 만드나
+
+v0.7 을 실기기 크기로 처음 캡처해 보니, **누각 기둥이 화면에서 가장 큰 덩어리인데
+가장 볼 것이 없었습니다.** 화면 폭의 28% 를 세로로 관통하는 평평한 갈색 띠로 읽히고,
+스토어 썸네일에서는 "갈색 막대" 가 됩니다. 스크린샷 4장 모두에서 같은 문제입니다.
+
+원인은 개정 2 의 프롬프트 문구입니다.
+
+> Between the pillars, dark recessed shadow so the structure reads as depth
+> **without detail.**
+
+제가 "디테일 없이" 라고 적어서 납품물은 지시대로 나왔습니다. 납품 잘못이 아니라
+발주 잘못이고, 이번 개정은 그 한 줄을 뒤집는 것입니다.
+
+**두 번째 문제는 반복 주기입니다.** 현재 420×900 은 화면 폭 390 기준 234px 마다
+되풀이되어 한 화면에 **3.6번** 들어갑니다. 눈에 띄게 반복적이라 높이를 2배로 늘려
+한 화면에 1.8번만 보이게 합니다.
+
+### 규격
+
+| | |
+|---|---|
+| 파일명 | `tuho-tower-column.png` (**이름 그대로 교체**) |
+| 크기 | **420 × 1800** (개정 2 는 900 → 세로 2배) |
+| 심리스 | **세로** — 위아래로 이어붙여 이음선이 없을 것 |
+| 알파 | 필요 (좌우 바깥은 투명) |
+
+> 크기가 바뀌므로 Claude 가 적용 시 `COL_AR` 상수를 `900/420` → `1800/420` 으로
+> 고칩니다(코드 한 줄). Codex 는 신경 쓰지 않아도 됩니다.
+
+### 지켜야 하는 제약 (게임 코드가 의존합니다)
+
+1. **좌우 끝까지 꽉 채울 것.** 발판(`tuho-tier`)이 기둥의 좌·우 가장자리에 정확히
+   붙습니다. 가장자리는 발판이 얹힐 만한 **단단한 기둥**으로 보여야 합니다.
+2. **맨 위 60px 과 맨 아래 60px 은 변화 없는 같은 단면**으로. 이음매가 그 구간에
+   생기므로, 거기에 무늬가 있으면 이어붙인 자리가 튑니다. 검증기가 이걸 봅니다.
+3. **값(명도)을 어둡게 유지.** 기둥 위로 항아리·화살·파티클·HUD 글자가 올라갑니다.
+   디테일은 넣되 **실루엣과 대비는 낮게** — 배경이지 주인공이 아닙니다.
+4. **낮 하늘(따뜻한 베이지)과 밤 하늘(짙은 남색) 양쪽에서 읽힐 것.** 고도가 오르면
+   하늘이 바뀌고, 기둥은 알파 0.9 로 그 위에 깔립니다.
+5. 좌우 대칭.
+
+### 원하는 리듬 (1800px 안에 2칸)
+
+```
+ 0 ~  60   평평한 보 — 이음매 구간 (무늬 없음)
+60 ~ 480   살창(창살) 칸 — 격자 사이로 어두운 실내
+480~ 620   단청 보 + 짧은 기와 처마 — 가로로 끊어 주는 띠
+620 ~1180  판벽(나무 널) 칸 — 세로 널 이음새만, 창은 없음
+1180~1320  단청 보 + 기와 처마 (480~620 과 같은 요소, 색만 다르게)
+1320~1740  살창 칸 (두 번째)
+1740~1800  평평한 보 — 0~60 과 **픽셀 단위로 동일**
+```
+
+살창 칸과 판벽 칸을 번갈아 두면, 2배로 길어진 타일이 한 번 더 반복돼도
+"같은 그림" 으로 읽히지 않습니다.
+
+### 프롬프트
+
+```
+A vertical slice of a Korean traditional wooden pavilion tower (누각), seen
+straight on in front orthographic elevation, NO perspective, NO vanishing point.
+
+Two sturdy timber pillars run the full height at the far left and far right
+edges, touching both edges. Between them the wall is NOT empty: it alternates
+between two bays stacked vertically —
+(a) a latticework window bay (살창): a fine wooden grid of thin vertical and
+    horizontal muntins, with deep dark interior visible between the bars;
+(b) a plank wall bay (판벽): vertical timber boards with simple seam lines,
+    no window.
+Between the bays run horizontal tie-beams carrying narrow dancheong painted
+bands and a short tiled eave lip that casts a thin shadow on the bay below.
+
+The top 60 pixels and the bottom 60 pixels must be a plain uninterrupted beam
+section, identical to each other, so that stacked copies join with NO visible
+seam. The pattern must tile seamlessly in the vertical direction.
+
+Keep the whole column LOW CONTRAST and DARK in value — it is a background
+element that gameplay objects are drawn on top of. The lattice and planks
+should read as texture, not as bright detail. Left-right symmetric.
+
+Timber in #a8763f / #7a5331 / #513520, recessed interior near #2a1b10,
+dancheong accents in #2f7a6a, #b4463c and #e8c24e used sparingly as thin
+bands only. Nothing may extend past the left or right edges; outside the
+column is fully transparent.
+[공통 스타일 토큰]
+```
+
+### 수락 기준
+
+```bash
+node tools/check-tower-art.mjs <파일>
+```
+
+- 위아래 끝줄 일치(이음새 없음) · 위·아래 60px 이 일정한 단면
+- 풀블리드(위·아래 가장자리까지 기둥이 닿음) · 위아래 단면 폭 동일 · 좌우 대칭
+- **눈 검사**: 2장을 세로로 이어붙여 1:1 로 보았을 때 ① 이음선이 안 보이고
+  ② 살창 칸과 판벽 칸이 번갈아 나와 "같은 그림 반복" 으로 읽히지 않을 것
+- **대비 검사**: 기둥 위에 흰 글자(HUD)를 얹어도 글자가 묻히지 않을 것
+
+### 같이 보면 좋은 것
+
+현재 화면이 어떤지는 `store-assets/shot1-throw.png` ~ `shot4-mark.png` 네 장을
+보시면 됩니다. 기둥이 차지하는 면적과 주변 하늘(낮/밤)이 그대로 들어 있습니다.
