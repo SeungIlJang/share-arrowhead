@@ -16,8 +16,11 @@
   #goal.done{color:#ffe14d}
   #climb{color:#c9b9ff;font-size:11px;font-weight:700;text-shadow:0 2px 3px #000;margin-top:2px}
   #climb b{color:#ffe14d}
-  #wind{position:fixed;top:calc(env(safe-area-inset-top,0px) + 98px);left:0;right:0;text-align:center;color:#9fd0ff;font-size:13px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:16px}
-  #mod{position:fixed;top:calc(env(safe-area-inset-top,0px) + 118px);left:0;right:0;text-align:center;color:#ffbe6b;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:15px}
+  /* #climb 한 줄(15px)을 #bar 에 더하면서 아래 두 줄을 같이 못 내려 94~109 와 98~ 가
+     11px 겹쳐 있었다. 실기기 화면을 처음 캡처해 보고 발견 — 스텁 하네스에는 레이아웃
+     엔진이 없어 DOM 겹침은 못 잡는다. 눈으로 봐야 하는 것이 아직 남아 있다는 뜻이다. */
+  #wind{position:fixed;top:calc(env(safe-area-inset-top,0px) + 114px);left:0;right:0;text-align:center;color:#9fd0ff;font-size:13px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:16px}
+  #mod{position:fixed;top:calc(env(safe-area-inset-top,0px) + 134px);left:0;right:0;text-align:center;color:#ffbe6b;font-size:12px;font-weight:800;text-shadow:0 2px 3px #000;pointer-events:none;z-index:5;min-height:15px}
   #hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);left:0;right:0;text-align:center;color:#ffe14d;font-size:15px;font-weight:800;text-shadow:0 2px 4px #000;pointer-events:none;z-index:5}
   #msg{position:fixed;top:42%;left:0;right:0;text-align:center;font-size:29px;font-weight:900;color:#fff;text-shadow:0 3px 6px #000;opacity:0;transition:opacity .12s;pointer-events:none;z-index:6}
   #sub{position:fixed;top:50%;left:0;right:0;text-align:center;font-size:14px;font-weight:700;color:#ffe6b0;text-shadow:0 2px 4px #000;opacity:0;transition:opacity .12s;pointer-events:none;z-index:6}
